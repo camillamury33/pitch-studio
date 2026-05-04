@@ -1,0 +1,4004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Corbett Road · Pitch Studio</title>
+
+  <!-- React + ReactDOM via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel standalone for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --ink: #0b1828;
+      --ink-soft: #18324d;
+      --parchment: #f4ecdc;
+      --parchment-dim: #e9dfc7;
+      --cream: #fbf6ea;
+      --gold: #b8893a;
+      --gold-soft: #d6a85a;
+      --accent: #8b1e1e;
+      --rule: rgba(11, 24, 40, 0.12);
+    }
+
+    html, body, #root {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .font-display {
+      font-family: 'Fraunces', Georgia, serif;
+      font-feature-settings: "ss01", "ss02";
+      letter-spacing: -0.02em;
+    }
+
+    .font-mono {
+      font-family: 'SF Mono', Menlo, Consolas, monospace;
+    }
+
+    /* Subtle paper texture */
+    .paper-bg {
+      background-color: var(--cream);
+      background-image:
+        radial-gradient(at 20% 10%, rgba(184, 137, 58, 0.06) 0px, transparent 50%),
+        radial-gradient(at 80% 90%, rgba(11, 24, 40, 0.04) 0px, transparent 50%);
+    }
+
+    .ink-bg {
+      background: var(--ink);
+      color: var(--parchment);
+    }
+
+    .gold-rule {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .btn-primary {
+      background: var(--ink);
+      color: var(--parchment);
+      transition: all 0.2s ease;
+      border: 1px solid var(--ink);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--ink-soft);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(11, 24, 40, 0.18);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--rule);
+      transition: all 0.2s ease;
+    }
+    .btn-ghost:hover {
+      background: rgba(11, 24, 40, 0.04);
+      border-color: var(--ink);
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--cream);
+      border: 1px solid var(--gold);
+      transition: all 0.2s ease;
+    }
+    .btn-gold:hover:not(:disabled) {
+      background: var(--gold-soft);
+      transform: translateY(-1px);
+    }
+
+    .input-field {
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--rule);
+      color: var(--ink);
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: var(--ink);
+      background: white;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+    }
+
+    .card-warm {
+      background: var(--parchment);
+      border: 1px solid rgba(184, 137, 58, 0.2);
+      border-radius: 4px;
+    }
+
+    /* Pulsing mic indicator */
+    @keyframes pulse-ring {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .pulse-ring::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      animation: pulse-ring 1.5s ease-out infinite;
+    }
+    .pulse-ring::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      animation: pulse-ring 1.5s ease-out 0.5s infinite;
+    }
+
+    /* Speaking waveform */
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.4); }
+      50% { transform: scaleY(1); }
+    }
+    .wave-bar {
+      animation: wave 0.8s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+    /* Reveal animation */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up {
+      animation: fade-up 0.4s ease-out both;
+    }
+
+    /* Score bar animation */
+    @keyframes fill-bar {
+      from { width: 0; }
+    }
+    .score-bar-fill {
+      animation: fill-bar 1s ease-out;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(11,24,40,0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(11,24,40,0.4); }
+
+    /* Mode toggle */
+    .mode-toggle {
+      background: rgba(11, 24, 40, 0.06);
+      border-radius: 999px;
+      padding: 4px;
+      display: inline-flex;
+    }
+    .mode-toggle button {
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      transition: all 0.2s ease;
+      color: var(--ink);
+      background: transparent;
+    }
+    .mode-toggle button.active {
+      background: var(--ink);
+      color: var(--parchment);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+    // ======================================================================
+    // CONFIGURATION & CONSTANTS
+    // ======================================================================
+
+    const COMPANY_DOMAIN = "corbettroad.com";
+    const APP_NAME = "Corbett Road · Pitch Studio";
+    const ADMIN_EMAIL = "camilla.carvalho@corbettroad.com";
+
+    // ======================================================================
+    // SUPABASE CONFIGURATION
+    // ======================================================================
+    // These are safe to be public — the publishable key only allows actions
+    // permitted by the database's Row Level Security policies.
+    const SUPABASE_URL = "https://gaiafozfuognlfuuegbt.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_rvsKDJY80LR8vJwpYRs6SA__WulvQBW";
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
+
+    // Groq free models — fast for live chat, smarter for grading
+    const MODEL_PROSPECT = "llama-3.1-8b-instant";       // fast for back-and-forth
+    const MODEL_COACH    = "llama-3.3-70b-versatile";    // smarter for suggestions
+    const MODEL_GRADER   = "llama-3.3-70b-versatile";    // smarter for report cards
+
+    const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+
+    // ======================================================================
+    // PROMPTS
+    // ======================================================================
+
+    const DIFFICULTY_INSTRUCTIONS = {
+      Easy: `DIFFICULTY: EASY — You are an easy-going, trusting prospect. The advisor across from you is newer, and you should be helpful in a way that lets them practice. Specifically:
+- Volunteer information freely. If asked a vague question, give a thoughtful, expansive answer.
+- When the advisor asks about your goals or concerns, share them openly. Don't make them dig.
+- Accept reasonable explanations without heavy pushback. You're the kind of prospect who came in already inclined to like them.
+- Gently nudge the advisor along if they seem stuck — drop hints about what you care about.
+- Don't ask hard challenging questions about fees or strategy unless they make a clear mistake.
+- Tone: warm, cooperative, slightly enthusiastic.`,
+
+      Medium: `DIFFICULTY: MEDIUM — You are a realistic prospect: open but appropriately skeptical. Specifically:
+- Ask questions and raise concerns naturally, but don't be hostile.
+- Occasionally push back if something feels off, but accept good answers.
+- Reveal information when asked thoughtful questions, but don't volunteer everything.
+- Have one or two specific concerns you care about — bring them up when relevant.
+- Tone: professional, curious, evaluating but fair.`,
+
+      Hard: `DIFFICULTY: HARD — You are a difficult, sophisticated, and skeptical prospect. You've been burned by an advisor before and you're protective of your money. You've done your research. You ask sharp questions across EVERY area, not just one. Specifically, push hard on all of the following whenever they come up:
+
+- **PROCESS**: "Walk me through your actual process. What's the first 90 days look like? Who am I working with — you or some junior associate?" "What happens when you're on vacation?" "How often will we meet — and is that calendar time or actual review time?"
+- **FEES**: "What does this actually cost me, all-in? AUM fee, transaction fees, fund expenses, custodian fees — give me the total." "How is your fee structure better than Vanguard's 0.04% or a robo-advisor's 0.25%?" "Are there any fees I won't see on my statement?"
+- **BENEFITS**: "Why should I pay 1% to you when I could DIY this for almost free?" "What do I actually get for that fee that I couldn't get from Schwab or Fidelity for less?"
+- **RETURNS & PERFORMANCE**: "What's your average client return, net of fees, over the last 5 years? 10 years?" "Compared to what benchmark?" "How did your clients do in 2008? In 2020? In 2022?"
+- **CREDENTIALS**: "What are your actual credentials — CFP, CFA, what?" "How long have you been doing this?" "What's your team's experience with someone in my situation?"
+- **CONFLICTS OF INTEREST**: "Are you a fiduciary 100% of the time, or only when it's convenient?" "Do you receive any commissions, kickbacks, or revenue sharing from any products you'd recommend?" "Why is this firm a better choice than the last one I just left?"
+- **COMMUNICATION & REPORTING**: "How will I know what's happening with my money between meetings?" "What does your reporting look like? Show me an example." "Who do I call when something goes wrong at 9pm on a Sunday?"
+- **PHILOSOPHY**: "What's your investment philosophy in plain English?" "Active or passive? Why?" "What do you think the market does in the next 12 months?" (push back on whatever they say)
+
+Behavioral rules:
+- Don't volunteer information. Make the advisor work for it. Give terse answers when asked vague questions.
+- Express doubt on broad claims. Demand specifics, evidence, examples.
+- If they use jargon, call it out: "What does 'tax-loss harvesting' actually mean for someone like me?"
+- Interrupt yourself with a new concern occasionally, jumping topics — that's how skeptical clients actually behave.
+- You can warm up if the advisor handles you well across multiple areas — but they have to earn it across PROCESS, FEES, RETURNS, and CONFLICTS, not just one.
+- Tone: skeptical, demanding, direct, occasionally cold. Not rude, but not friendly until earned.`,
+    };
+
+    const CURRICULUM_STEPS = {
+      meeting_introduction: {
+        label: "Meeting Introduction",
+        order: 1,
+        scenario: "This is the very start of the meeting. You and the prospect have just sat down. The prospect is waiting for you to open.",
+        prospectPrimer: "You've just sat down across from the advisor. You're waiting for them to take the lead and open the meeting professionally.",
+        focus: "Practice opening the meeting warmly, setting the agenda, establishing credibility, and making the prospect comfortable.",
+      },
+      profiling: {
+        label: "Profiling the Prospect",
+        order: 2,
+        scenario: "Introductions are over. You and the prospect have exchanged pleasantries — now it's time to learn about them.",
+        prospectPrimer: "Introductions are done. You've said something brief like 'Yeah, glad to be here. Where would you like to start?' — and now you're waiting to be asked thoughtful questions about your situation.",
+        focus: "Practice asking situation questions to understand the prospect's life, work, family, financial situation. Don't pitch — just learn.",
+      },
+      uncovering_problems: {
+        label: "Uncovering Key Problems & Concerns",
+        order: 3,
+        scenario: "You've gathered the basics about the prospect — their job, family, retirement timeline, current investments. Now you need to uncover their REAL concerns and pain points.",
+        prospectPrimer: "The advisor has already learned the basics about you (job, family, retirement timeframe, current portfolio). You haven't yet revealed your deeper concerns. Begin by giving a brief recap of one piece of your situation, then wait for the advisor to probe deeper.",
+        focus: "Practice probing for real concerns and pain points beneath the surface. Use problem questions to surface what's actually worrying them.",
+      },
+      reviewing_implications: {
+        label: "Reviewing Implications",
+        order: 4,
+        scenario: "The prospect has shared a real concern. Now you need to explore what that concern would mean — financially, emotionally, for their family — if it's not addressed.",
+        prospectPrimer: "The advisor knows your basics and you've just shared one specific concern (e.g., 'I'm not sure if I'll have enough to retire when I want to' or 'I'm worried about taxes eating into what I leave my kids'). You haven't yet thought through what that concern would actually mean if it played out. Wait for the advisor to help you explore it.",
+        focus: "Practice asking implication questions that help the prospect feel the weight of their concerns — emotional, financial, family impact.",
+      },
+      providing_solutions: {
+        label: "Providing Clear Solutions",
+        order: 5,
+        scenario: "You understand the prospect's situation, their concerns, and the implications. Now present clear, tailored solutions that connect Corbett Road's services to what they specifically said.",
+        prospectPrimer: "The advisor understands your situation and your concerns. You've explored the implications together. Now you're sitting back, looking at them, and you ask something like: 'So... what would you actually do for me?' Wait for them to present solutions tailored to what you've shared.",
+        focus: "Practice presenting solutions that explicitly tie back to what the prospect said. Avoid generic feature lists. Connect each service to a specific concern.",
+      },
+      call_to_action: {
+        label: "Call to Action & Next Steps",
+        order: 6,
+        scenario: "Solutions are presented. The prospect seems interested but hasn't committed. Now move them to a specific next step.",
+        prospectPrimer: "The advisor has presented solutions and you're interested but cautious. You say something like: 'This sounds promising... so what's the next step?' or 'I need to think about it.' Wait for them to propose a clear, low-friction next step.",
+        focus: "Practice asking for a specific commitment — schedule a follow-up, send a plan, gather documents. Make the next step easy to say yes to.",
+      },
+      wrap_up: {
+        label: "Meeting Wrap-Up",
+        order: 7,
+        scenario: "Next steps are agreed. Now wrap up the meeting professionally — summarize, reinforce the relationship, leave the door open.",
+        prospectPrimer: "You've agreed on next steps. The meeting is winding down. You say something like: 'Great, I think this was helpful.' Wait for the advisor to wrap things up professionally.",
+        focus: "Practice summarizing what was agreed, expressing genuine appreciation, and leaving with warm professionalism.",
+      },
+    };
+
+    const buildProspectSystemPrompt = (persona) => {
+      const difficulty = persona.difficulty || "Medium";
+      const difficultyBlock = DIFFICULTY_INSTRUCTIONS[difficulty] || DIFFICULTY_INSTRUCTIONS.Medium;
+
+      let curriculumBlock = "";
+      if (persona.focusStep && CURRICULUM_STEPS[persona.focusStep]) {
+        const step = CURRICULUM_STEPS[persona.focusStep];
+        curriculumBlock = `
+
+CURRICULUM MODE — FOCUSED PRACTICE:
+The advisor is practicing a single step of the pitch process: "${step.label}".
+SCENARIO PRIMER: ${step.prospectPrimer}
+Open the conversation with one short turn that puts the advisor at this step in the pitch — NOT at the very beginning. Don't introduce yourself again or say hello unless the step is "Meeting Introduction". Just pick up mid-conversation as the primer describes.
+This will be a SHORT focused session (~3-5 minutes). Stay engaged and let them practice this step.`;
+      }
+
+      return `You are role-playing as a prospective wealth management client meeting a financial advisor from Corbett Road Wealth Management. You are evaluating whether to hire them.
+
+YOUR CHARACTER DETAILS:
+- Name: ${persona.name || "[invent a realistic name]"}
+- Age: ${persona.age || "[invent — typically 45–70]"}
+- Retirement timeframe: ${persona.retirement || "[invent]"}
+- What you want in retirement: ${persona.retirementGoals || "[invent realistic lifestyle goals]"}
+- Current investment strategies: ${persona.currentStrategies || "[invent — e.g. 401k, some individual stocks, savings account]"}
+- Primary financial goal: ${persona.primaryGoal || "[invent]"}
+- Investing comfort level: ${persona.comfortLevel || "[invent — conservative, moderate, or aggressive]"}
+- Estimated time before pulling money from savings: ${persona.pullTime || "[invent]"}
+- Current monthly savings: ${persona.monthlySavings || "[invent realistic figure]"}
+- Current household income: ${persona.income || "[invent realistic figure]"}
+- Current investable assets: ${persona.assets || "[invent realistic figure]"}
+
+ADDITIONAL CONTEXT FROM USER (if any): ${persona.notes || "(none)"}
+
+${difficultyBlock}
+${curriculumBlock}
+
+CRITICAL RULES — READ CAREFULLY:
+1. Stay in character as this prospect at all times. Never break character. Never mention you are an AI.
+2. Do NOT coach the advisor. Do NOT provide feedback. You are the prospect, not a coach.
+3. Fill in gaps in your background by inventing realistic, consistent details as needed. Remember what you've said and stay consistent.
+4. Speak naturally. Keep responses concise — usually 1–3 sentences. This is a real conversation.
+5. Use natural speech patterns — fillers, hesitations, "yeah", "well", "honestly" — like a real person speaking out loud. Avoid lists and bullet points.
+6. If the advisor asks something you wouldn't reasonably know, say so naturally ("I'd have to check on that").
+7. When the advisor thanks you and asks for feedback, that signals the end. Do NOT switch into coach mode — the system will handle the report card separately.
+8. Never use markdown formatting. Just speak.
+
+${persona.focusStep ? "Open the conversation now per the curriculum primer above." : "Begin the conversation as the prospect. Wait for the advisor to start, then respond naturally."}`;
+    };
+
+    const buildCoachSystemPrompt = () => `You are a senior sales coach observing a financial advisor's pitch to a prospect in real time. Your job is to suggest what an EXPERT advisor would say next, based on what the prospect just said.
+
+Use SPIN selling principles (Situation, Problem, Implication, Need-Payoff) and consultative sales best practices. Reward:
+- Asking discovery questions before pitching
+- Uncovering implications and emotional drivers
+- Building rapport before solutioning
+- Avoiding jargon and pressure tactics
+- Tying solutions to the prospect's specific stated concerns
+
+Provide a brief, specific, conversational suggestion of what the advisor should say next. 2–3 sentences max. Sound natural, not scripted. Do not use markdown. Do not preface with "You should..." — just give the actual words.`;
+
+    const buildGraderSystemPrompt = (persona, transcript) => {
+      const difficulty = persona.difficulty || "Medium";
+      const focusStep = persona.focusStep;
+      const focusBlock = focusStep && CURRICULUM_STEPS[focusStep] ? `
+
+CURRICULUM MODE — FOCUSED PRACTICE:
+This was a focused practice session on a single step: "${CURRICULUM_STEPS[focusStep].label}".
+${CURRICULUM_STEPS[focusStep].focus}
+The conversation may have been short by design. Score generously on the steps that weren't the focus (give a default of 6/10 if there wasn't enough material to grade), but score the FOCUSED step rigorously and provide detailed evidence.` : "";
+
+      return `You are a senior sales coach reviewing a financial advisor's pitch to a prospective wealth management client. Score the pitch and provide evidence-based feedback.
+
+PROSPECT PROFILE:
+${JSON.stringify(persona, null, 2)}
+
+DIFFICULTY LEVEL: ${difficulty}
+${difficulty === "Easy" ? "(The prospect was set to easy mode — they were cooperative and helpful. Adjust your scoring accordingly: don't reward the advisor for getting cooperation that was given freely.)" : ""}
+${difficulty === "Hard" ? "(The prospect was set to hard mode — they pushed back, asked challenging questions about fees, and were skeptical. Reward the advisor for handling difficulty well.)" : ""}
+${focusBlock}
+
+FULL TRANSCRIPT:
+${transcript}
+
+Score the advisor 1–10 in each of these 7 categories. For each score, cite a SPECIFIC moment from the transcript as evidence (quote a phrase or describe what was said/missed). Be honest — most real pitches score 5–7. Reserve 9–10 for genuine excellence.
+
+Categories:
+1. Meeting Introduction — Did the advisor open warmly, set the agenda, and establish credibility?
+2. Profiling the Prospect — Did the advisor ask thoughtful situation questions to understand the prospect's life, goals, family, work?
+3. Uncovering and Identifying Key Problems/Concerns — Did the advisor surface the prospect's real worries, gaps, or motivations?
+4. Reviewing the Implications of the Problems/Concerns — Did the advisor explore what those problems would mean if unaddressed (financial, emotional, family impact)?
+5. Providing a Clear Solution(s) or Offer(s) — Did the advisor connect Corbett Road's services to the prospect's specific stated concerns?
+6. Giving the Prospect a Call To Action and Actionable Next Steps — Did the advisor ask for a concrete commitment or next step?
+7. Meeting Wrap-Up — Did the advisor close professionally, summarize, and leave the door open?
+
+Also provide qualitative feedback on:
+- Cadence
+- Conversational flow
+- Format
+- Knowledge demonstrated
+- Referencing specific client concerns/objections
+- Building rapport
+- Confidence
+- Delivery
+
+Return ONLY valid JSON in this exact shape (no markdown, no commentary outside JSON):
+{
+  "scores": {
+    "meeting_introduction":         { "score": 0, "evidence": "", "reasoning": "" },
+    "profiling":                    { "score": 0, "evidence": "", "reasoning": "" },
+    "uncovering_problems":          { "score": 0, "evidence": "", "reasoning": "" },
+    "reviewing_implications":       { "score": 0, "evidence": "", "reasoning": "" },
+    "providing_solutions":          { "score": 0, "evidence": "", "reasoning": "" },
+    "call_to_action":               { "score": 0, "evidence": "", "reasoning": "" },
+    "wrap_up":                      { "score": 0, "evidence": "", "reasoning": "" }
+  },
+  "qualitative": {
+    "cadence":              "",
+    "conversational_flow":  "",
+    "format":               "",
+    "knowledge":            "",
+    "referencing_concerns": "",
+    "rapport":              "",
+    "confidence":           "",
+    "delivery":             ""
+  },
+  "summary": "2–4 sentence overall assessment. Honest, professional, succinct.",
+  "top_strengths": ["", "", ""],
+  "top_growth_areas": ["", "", ""]
+}`;
+    };
+
+    const buildPersonaGenPrompt = () => `Generate a realistic prospective wealth management client for a financial advisor training simulation. The prospect should be a believable real person with a coherent financial situation. Vary the profile (don't always pick a tech executive). Mix in business owners, dual-income professionals, recent inheritors, pre-retirees, divorcees, etc.
+
+Return ONLY valid JSON in this exact shape (no commentary):
+{
+  "name": "First Last",
+  "age": "number as string",
+  "retirement": "e.g. 'about 8 years' or 'already retired 2 years' ",
+  "retirementGoals": "what they want to do — 1 sentence",
+  "currentStrategies": "what they're currently invested in — 1 sentence",
+  "primaryGoal": "their main financial priority — 1 sentence",
+  "comfortLevel": "Conservative | Moderate | Aggressive — with one phrase of color",
+  "pullTime": "when they'd start drawing — short phrase",
+  "monthlySavings": "$X,XXX",
+  "income": "$XXX,XXX",
+  "assets": "$X,XXX,XXX",
+  "notes": "1–2 sentences of life context — family, occupation, recent event, mood about money"
+}`;
+
+    const buildDiscussionSystemPrompt = (report) => {
+      const transcriptText = (report.transcript || [])
+        .map(t => `${t.role === "advisor" ? "ADVISOR" : "PROSPECT"}: ${t.text}`)
+        .join("\n");
+      const cardSummary = report.card ? JSON.stringify(report.card, null, 2) : "(not graded)";
+      const personaSummary = report.persona ? JSON.stringify(report.persona, null, 2) : "(no persona data)";
+      const va = report.voiceAnalytics ? JSON.stringify(report.voiceAnalytics, null, 2) : "(no voice analytics)";
+
+      return `You are a senior sales coach for Corbett Road Wealth Management, having a conversation with one of the firm's financial advisors about a pitch session they just completed. You are warm, direct, specific, and concrete — never vague or generic. You speak naturally, like a senior colleague reviewing notes together, NOT like a textbook.
+
+You have full access to the session transcript, report card, persona, and voice analytics. Use them. When making a point, cite specific moments from the transcript ("at the moment when you said X..." or "when the prospect raised Y..."). Don't lecture — answer what they actually ask.
+
+If the advisor asks "how could I have handled X better?" — give them 2-3 specific, alternative phrasings or approaches they could have used. Be concrete enough that they could try them in their next session.
+
+If the advisor asks for general feedback, focus on the 1-2 most important things to work on, not a laundry list. Don't repeat what's already in the report card — they can read it. Add nuance or coaching the report card doesn't capture.
+
+Keep responses focused and digestible — usually 3-6 sentences unless the advisor asks for an in-depth breakdown. Use plain language. Avoid markdown headers and bullet point lists unless the advisor asks for a structured breakdown.
+
+==========================================
+SESSION CONTEXT:
+==========================================
+
+PROSPECT PERSONA:
+${personaSummary}
+
+TRANSCRIPT:
+${transcriptText}
+
+REPORT CARD:
+${cardSummary}
+
+VOICE ANALYTICS:
+${va}
+
+==========================================
+
+The advisor will now ask you questions. Engage as a thoughtful coach.`;
+    };
+
+    // ======================================================================
+    // GROQ API HELPER
+    // ======================================================================
+
+    async function callGroq({ apiKey, model, messages, temperature = 0.7, jsonMode = false }) {
+      const body = {
+        model,
+        messages,
+        temperature,
+      };
+      if (jsonMode) {
+        body.response_format = { type: "json_object" };
+      }
+
+      const res = await fetch(GROQ_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Groq API error ${res.status}: ${errText}`);
+      }
+
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content || "";
+    }
+
+    // ======================================================================
+    // STORAGE HELPERS
+    // ======================================================================
+
+    const STORAGE_KEYS = {
+      apiKey: "crpt_groq_key",
+      user: "crpt_user",
+      reports: "crpt_reports",
+      preferredVoice: "crpt_voice",
+      chromeConfirmed: "crpt_chrome_confirmed",
+      passcodeHash: "crpt_passcode_hash",
+      registeredEmail: "crpt_registered_email",
+      migrationComplete: "crpt_migration_complete",
+    };
+
+    const storage = {
+      get: (k, fallback = null) => {
+        try {
+          const v = localStorage.getItem(k);
+          return v == null ? fallback : JSON.parse(v);
+        } catch {
+          return fallback;
+        }
+      },
+      set: (k, v) => {
+        try {
+          localStorage.setItem(k, JSON.stringify(v));
+        } catch (e) { console.error("Storage failed", e); }
+      },
+      remove: (k) => localStorage.removeItem(k),
+    };
+
+    // ======================================================================
+    // SUPABASE DATA LAYER — cloud reads/writes for reports + profiles
+    // ======================================================================
+
+    // Convert a Supabase auth user into the shape our app uses
+    function toAppUser(sbUser) {
+      const email = sbUser.email || "";
+      return {
+        id: sbUser.id,
+        email,
+        name: nameFromEmailLocal(email),
+      };
+    }
+
+    function nameFromEmailLocal(email) {
+      if (!email) return "Advisor";
+      return email.split("@")[0]
+        .split(/[._\-]/)
+        .filter(Boolean)
+        .map(s => s[0].toUpperCase() + s.slice(1))
+        .join(" ");
+    }
+
+    // Fetch the current user's report cards from cloud
+    async function fetchUserReports(userId) {
+      const { data, error } = await sb
+        .from("report_cards")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []).map(rowToReport);
+    }
+
+    // Fetch all team profiles
+    async function fetchAllProfiles() {
+      const { data, error } = await sb
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data || [];
+    }
+
+    // Fetch ALL report cards across the team (used by My Team view)
+    async function fetchAllReports() {
+      const { data, error } = await sb
+        .from("report_cards")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []).map(rowToReport);
+    }
+
+    // Save a report card to the cloud
+    async function saveReportToCloud(userId, report) {
+      const row = {
+        user_id: userId,
+        mode: report.mode,
+        persona: report.persona || null,
+        transcript: report.transcript || [],
+        card: report.card ? { ...report.card, voiceAnalytics: report.voiceAnalytics || null } : (report.voiceAnalytics ? { voiceAnalytics: report.voiceAnalytics } : null),
+        created_at: new Date(report.createdAt || Date.now()).toISOString(),
+      };
+      const { error } = await sb.from("report_cards").insert(row);
+      if (error) throw error;
+    }
+
+    // Delete a report card from the cloud
+    async function deleteReportFromCloud(reportId) {
+      const { error } = await sb.from("report_cards").delete().eq("id", reportId);
+      if (error) throw error;
+    }
+
+    // Convert a database row into our app's report shape
+    function rowToReport(row) {
+      const card = row.card || null;
+      // Voice analytics may be embedded in the card field (since we don't have a dedicated DB column)
+      const voiceAnalytics = card && card.voiceAnalytics ? card.voiceAnalytics : null;
+      // Strip voiceAnalytics from card so display logic still works as expected
+      const cleanCard = card ? { ...card } : null;
+      if (cleanCard) delete cleanCard.voiceAnalytics;
+      return {
+        id: row.id,
+        userId: row.user_id,
+        mode: row.mode,
+        persona: row.persona,
+        transcript: row.transcript || [],
+        card: cleanCard,
+        voiceAnalytics,
+        createdAt: new Date(row.created_at).getTime(),
+      };
+    }
+
+    // Migrate any pre-Supabase localStorage reports to the cloud (one-time)
+    async function migrateLocalReportsIfNeeded(userId) {
+      if (storage.get(STORAGE_KEYS.migrationComplete)) return;
+      const local = storage.get(STORAGE_KEYS.reports, []);
+      if (!Array.isArray(local) || local.length === 0) {
+        storage.set(STORAGE_KEYS.migrationComplete, true);
+        return;
+      }
+      console.log(`Migrating ${local.length} local reports to cloud...`);
+      let migrated = 0;
+      for (const r of local) {
+        try {
+          await saveReportToCloud(userId, r);
+          migrated++;
+        } catch (e) {
+          console.warn("Failed to migrate one report:", e);
+        }
+      }
+      storage.set(STORAGE_KEYS.migrationComplete, true);
+      console.log(`Migration complete: ${migrated}/${local.length} reports.`);
+    }
+
+    // ======================================================================
+    // VOICE HELPERS — Web Speech API
+    // ======================================================================
+
+    function getSpeechRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return null;
+      const rec = new SR();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+      return rec;
+    }
+
+    function getBestVoice(preferredName) {
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices || voices.length === 0) return null;
+      if (preferredName) {
+        const match = voices.find(v => v.name === preferredName);
+        if (match) return match;
+      }
+      // Prefer a natural-sounding English voice; weight Google voices first
+      const en = voices.filter(v => v.lang.startsWith("en"));
+      const preferred = en.find(v => /Google US English/i.test(v.name)) ||
+                        en.find(v => /Microsoft.*(Aria|Jenny|Guy|Davis|Tony)/i.test(v.name)) ||
+                        en.find(v => /Samantha|Alex|Daniel|Karen/i.test(v.name)) ||
+                        en[0];
+      return preferred || voices[0];
+    }
+
+    function speak({ text, voice, onStart, onEnd }) {
+      return new Promise((resolve) => {
+        if (!text || !text.trim()) { resolve(); return; }
+        const utter = new SpeechSynthesisUtterance(text);
+        if (voice) utter.voice = voice;
+        utter.rate = 1.0;
+        utter.pitch = 1.0;
+        utter.onstart = () => { if (onStart) onStart(); };
+        utter.onend = () => { if (onEnd) onEnd(); resolve(); };
+        utter.onerror = () => { if (onEnd) onEnd(); resolve(); };
+        window.speechSynthesis.speak(utter);
+      });
+    }
+
+    function stopSpeaking() {
+      try { window.speechSynthesis.cancel(); } catch {}
+    }
+
+    // ======================================================================
+    // BROWSER DETECTION
+    // ======================================================================
+
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      // Order matters — Edge & Opera both contain "Chrome" in UA, so check them first
+      if (/Edg\//.test(ua)) return "Edge";
+      if (/OPR\//.test(ua) || /Opera/.test(ua)) return "Opera";
+      if (/Brave/.test(ua) || (navigator.brave && navigator.brave.isBrave)) return "Brave";
+      if (/Firefox\//.test(ua)) return "Firefox";
+      if (/Chrome\//.test(ua)) return "Chrome";
+      if (/Safari\//.test(ua)) return "Safari";
+      return "an unsupported browser";
+    }
+
+    // ======================================================================
+    // PASSCODE HASHING & NAME HELPERS
+    // ======================================================================
+
+    async function hashPasscode(email, passcode) {
+      const data = new TextEncoder().encode(`${email.toLowerCase()}:${passcode}`);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    function nameFromEmail(email) {
+      return email.split("@")[0]
+        .split(/[._\-]/)
+        .filter(Boolean)
+        .map(s => s[0].toUpperCase() + s.slice(1))
+        .join(" ");
+    }
+
+    // ======================================================================
+    // VOICE ANALYTICS — compute speech metrics from transcript
+    // ======================================================================
+
+    function computeVoiceAnalytics(transcript) {
+      if (!transcript || transcript.length === 0) return null;
+
+      const advisorTurns = transcript.filter(t => t.role === "advisor");
+      const prospectTurns = transcript.filter(t => t.role === "prospect");
+
+      const wordsOf = (text) => text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+
+      const advisorWords = advisorTurns.flatMap(t => wordsOf(t.text));
+      const prospectWords = prospectTurns.flatMap(t => wordsOf(t.text));
+
+      const totalAdvisorWords = advisorWords.length;
+      const totalProspectWords = prospectWords.length;
+      const totalWords = totalAdvisorWords + totalProspectWords;
+      const talkRatio = totalWords > 0 ? totalAdvisorWords / totalWords : 0;
+
+      // Filler word detection
+      const fillerCount = {};
+      // Single-word fillers (need exact word match, ignoring punctuation)
+      const singleFillers = ["um", "uh", "uhm", "er", "ah", "like", "basically", "literally", "actually", "honestly"];
+      singleFillers.forEach(filler => { fillerCount[filler] = 0; });
+      advisorWords.forEach(w => {
+        const clean = w.replace(/[.,!?;:'"]/g, "");
+        if (singleFillers.includes(clean)) fillerCount[clean] += 1;
+      });
+
+      // Multi-word fillers (regex on the joined text)
+      const advisorText = advisorTurns.map(t => t.text.toLowerCase()).join(" ");
+      const multiFillers = ["you know", "kind of", "sort of", "i mean", "i guess"];
+      multiFillers.forEach(filler => {
+        const escaped = filler.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const matches = advisorText.match(new RegExp(`\\b${escaped}\\b`, "g")) || [];
+        fillerCount[filler] = matches.length;
+      });
+
+      const totalFillers = Object.values(fillerCount).reduce((a, b) => a + b, 0);
+      const fillerPercentage = totalAdvisorWords > 0 ? (totalFillers / totalAdvisorWords) * 100 : 0;
+
+      const topFillers = Object.entries(fillerCount)
+        .filter(([_, count]) => count > 0)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+
+      const sessionDurationMs = transcript.length > 0
+        ? transcript[transcript.length - 1].ts - transcript[0].ts
+        : 0;
+      const sessionDurationMin = sessionDurationMs / 1000 / 60;
+
+      return {
+        totalAdvisorWords,
+        totalProspectWords,
+        talkRatio,
+        fillerCount: totalFillers,
+        fillerPercentage,
+        topFillers,
+        averageTurnWords: advisorTurns.length > 0 ? Math.round(totalAdvisorWords / advisorTurns.length) : 0,
+        advisorTurnCount: advisorTurns.length,
+        prospectTurnCount: prospectTurns.length,
+        sessionDurationMin,
+      };
+    }
+
+    // ======================================================================
+    // SHARED UI BITS
+    // ======================================================================
+
+    const Logo = ({ className = "" }) => (
+      <div className={`flex items-center gap-3 ${className}`}>
+        <div className="w-8 h-8 border border-current rotate-45 flex items-center justify-center">
+          <div className="w-2 h-2 bg-current -rotate-45"></div>
+        </div>
+        <div>
+          <div className="font-display text-lg leading-none tracking-tight">Corbett Road</div>
+          <div className="text-[10px] uppercase tracking-[0.25em] opacity-60 mt-0.5">Pitch Studio</div>
+        </div>
+      </div>
+    );
+
+    const TopNav = ({ user, onSignOut, onNavigate, currentView }) => (
+      <header className="border-b" style={{ borderColor: "var(--rule)" }}>
+        <div className="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
+          <button onClick={() => onNavigate("dashboard")} className="text-left">
+            <Logo />
+          </button>
+          <nav className="flex items-center gap-8 text-sm">
+            <button
+              onClick={() => onNavigate("dashboard")}
+              className={`uppercase tracking-[0.18em] text-xs ${currentView === "dashboard" ? "text-[var(--ink)]" : "text-[var(--ink)]/60 hover:text-[var(--ink)]"}`}
+            >
+              Studio
+            </button>
+            <button
+              onClick={() => onNavigate("history")}
+              className={`uppercase tracking-[0.18em] text-xs ${currentView === "history" ? "text-[var(--ink)]" : "text-[var(--ink)]/60 hover:text-[var(--ink)]"}`}
+            >
+              Report Cards
+            </button>
+            <button
+              onClick={() => onNavigate("team")}
+              className={`uppercase tracking-[0.18em] text-xs ${currentView === "team" ? "text-[var(--ink)]" : "text-[var(--ink)]/60 hover:text-[var(--ink)]"}`}
+            >
+              My Team
+            </button>
+            <button
+              onClick={() => onNavigate("settings")}
+              className={`uppercase tracking-[0.18em] text-xs ${currentView === "settings" ? "text-[var(--ink)]" : "text-[var(--ink)]/60 hover:text-[var(--ink)]"}`}
+            >
+              Settings
+            </button>
+            <div className="h-6 w-px" style={{ background: "var(--rule)" }}></div>
+            <div className="text-xs text-[var(--ink)]/60 font-mono">{user?.email}</div>
+            <button onClick={onSignOut} className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/40 hover:text-[var(--accent)]">
+              Sign out
+            </button>
+          </nav>
+        </div>
+      </header>
+    );
+
+    // ======================================================================
+    // LOGIN VIEW — Supabase Auth (email + password)
+    // ======================================================================
+
+    function LoginView({ onSignIn }) {
+      const [step, setStep] = useState("email"); // "email" | "signin" | "signup"
+      const [email, setEmail] = useState("");
+      const [password, setPassword] = useState("");
+      const [confirmPassword, setConfirmPassword] = useState("");
+      const [showPassword, setShowPassword] = useState(false);
+      const [error, setError] = useState("");
+      const [info, setInfo] = useState("");
+      const [busy, setBusy] = useState(false);
+
+      const submitEmail = async (e) => {
+        e.preventDefault();
+        setError(""); setInfo("");
+        const trimmed = email.trim().toLowerCase();
+        if (!trimmed) { setError("Please enter your email."); return; }
+        if (!trimmed.includes("@") || !trimmed.endsWith("@" + COMPANY_DOMAIN)) {
+          setError(`Use your @${COMPANY_DOMAIN} email address.`);
+          return;
+        }
+        setEmail(trimmed);
+
+        // Check if a previous (pre-Supabase) registration exists locally for this email
+        // → if so, this is a returning user we want to sign in
+        // → otherwise show signup
+        const previouslyRegistered = storage.get(STORAGE_KEYS.registeredEmail);
+        if (previouslyRegistered && previouslyRegistered.toLowerCase() === trimmed) {
+          setInfo("Welcome back. We've upgraded the app — please sign in or create an account if you haven't already.");
+        }
+        // Always show signin first for returning users; they can switch to signup if needed
+        setStep("signin");
+      };
+
+      const submitSignIn = async (e) => {
+        e.preventDefault();
+        setError(""); setInfo("");
+        if (!password) { setError("Enter your password."); return; }
+        setBusy(true);
+        try {
+          const { data, error: authError } = await sb.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (authError) {
+            // Friendly error messages
+            if (/Invalid login credentials/i.test(authError.message)) {
+              setError("Email or password is incorrect. If you haven't created an account yet, click 'Create new account' below.");
+            } else {
+              setError(authError.message);
+            }
+            setBusy(false);
+            return;
+          }
+          // Supabase auth state listener in App will handle the actual sign-in
+          // We just don't do anything else here — the listener takes over
+        } catch (err) {
+          setError("Something went wrong. Please try again.");
+          setBusy(false);
+        }
+      };
+
+      const submitSignUp = async (e) => {
+        e.preventDefault();
+        setError(""); setInfo("");
+        if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+        if (password !== confirmPassword) { setError("Passwords don't match."); return; }
+        setBusy(true);
+        try {
+          const { data, error: authError } = await sb.auth.signUp({
+            email,
+            password,
+          });
+          if (authError) {
+            if (/already registered/i.test(authError.message) || /already been registered/i.test(authError.message)) {
+              setError("An account already exists for this email. Click 'Sign in instead' below.");
+            } else {
+              setError(authError.message);
+            }
+            setBusy(false);
+            return;
+          }
+          // App's auth listener will pick up the new session and route the user forward
+        } catch (err) {
+          setError("Something went wrong. Please try again.");
+          setBusy(false);
+        }
+      };
+
+      const editEmail = () => {
+        setStep("email");
+        setPassword(""); setConfirmPassword("");
+        setError(""); setInfo("");
+      };
+
+      const switchToSignUp = () => {
+        setStep("signup");
+        setPassword(""); setConfirmPassword("");
+        setError(""); setInfo("");
+      };
+
+      const switchToSignIn = () => {
+        setStep("signin");
+        setPassword(""); setConfirmPassword("");
+        setError(""); setInfo("");
+      };
+
+      const switchToForgot = () => {
+        setStep("forgot");
+        setError(""); setInfo("");
+      };
+
+      return (
+        <div className="min-h-screen paper-bg flex">
+          {/* Left brand panel */}
+          <div className="hidden md:flex md:w-1/2 ink-bg p-12 flex-col justify-between relative overflow-hidden">
+            <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full opacity-10" style={{ background: "var(--gold)" }}></div>
+            <Logo className="text-[var(--parchment)]" />
+            <div className="relative z-10">
+              <div className="text-xs uppercase tracking-[0.3em] text-[var(--gold-soft)] mb-4">For internal use</div>
+              <h1 className="font-display text-5xl lg:text-6xl leading-[0.95] mb-6">
+                Where <em className="text-[var(--gold-soft)]">advisors</em> become<br/>trusted voices.
+              </h1>
+              <p className="text-[var(--parchment)]/70 max-w-md text-sm leading-relaxed">
+                A private practice studio for rehearsing the consultative pitch — built around our seven-step pitch framework, with on-demand AI prospects and instant report cards.
+              </p>
+            </div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-[var(--parchment)]/30">
+              Corbett Road Wealth Management
+            </div>
+          </div>
+
+          {/* Right panel — content depends on step */}
+          <div className="w-full md:w-1/2 flex items-center justify-center p-8">
+            <div className="w-full max-w-sm fade-up" key={step}>
+              <div className="md:hidden mb-12"><Logo /></div>
+
+              {/* ===== Step 1: Email entry ===== */}
+              {step === "email" && (
+                <>
+                  <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-3">Sign in</div>
+                  <h2 className="font-display text-3xl mb-2">Welcome.</h2>
+                  <p className="text-sm text-[var(--ink)]/60 mb-10">Enter your company email to continue.</p>
+
+                  <form onSubmit={submitEmail} className="space-y-5">
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">Company email</label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => { setEmail(e.target.value); setError(""); }}
+                        placeholder={`yourname@${COMPANY_DOMAIN}`}
+                        className="input-field w-full px-4 py-3 rounded text-sm"
+                        autoFocus
+                      />
+                    </div>
+                    {error && (
+                      <div className="text-xs text-[var(--accent)] flex items-start gap-2">
+                        <span>•</span><span>{error}</span>
+                      </div>
+                    )}
+                    <button type="submit" className="btn-primary w-full px-6 py-3 rounded text-sm uppercase tracking-[0.18em]">
+                      Continue →
+                    </button>
+                  </form>
+
+                  <div className="mt-12 pt-6 border-t text-[11px] text-[var(--ink)]/40 leading-relaxed" style={{ borderColor: "var(--rule)" }}>
+                    Restricted to <span className="font-mono">@{COMPANY_DOMAIN}</span> addresses. By signing in you agree to use this tool for training purposes only — never enter real client information.
+                  </div>
+                </>
+              )}
+
+              {/* ===== Step 2A: Sign in ===== */}
+              {step === "signin" && (
+                <>
+                  <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-3">Sign in</div>
+                  <h2 className="font-display text-3xl mb-2">Welcome back.</h2>
+                  <p className="text-sm text-[var(--ink)]/60 mb-6">
+                    <span className="font-mono text-[var(--ink)]">{email}</span>{" "}
+                    <button onClick={editEmail} className="text-[var(--gold)] hover:underline ml-1 text-xs">change</button>
+                  </p>
+
+                  {info && (
+                    <div className="card-warm p-4 mb-6 text-xs text-[var(--ink)]/80 leading-relaxed">
+                      {info}
+                    </div>
+                  )}
+
+                  <form onSubmit={submitSignIn} className="space-y-5">
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">Password</label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={e => { setPassword(e.target.value); setError(""); }}
+                          placeholder="Your password"
+                          className="input-field w-full px-4 py-3 pr-16 rounded text-sm"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(s => !s)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-[0.15em] text-[var(--ink)]/50 hover:text-[var(--ink)]"
+                        >
+                          {showPassword ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                    </div>
+                    {error && (
+                      <div className="text-xs text-[var(--accent)] flex items-start gap-2">
+                        <span>•</span><span>{error}</span>
+                      </div>
+                    )}
+                    <button type="submit" disabled={busy} className="btn-primary w-full px-6 py-3 rounded text-sm uppercase tracking-[0.18em]">
+                      {busy ? "Signing in…" : "Sign In"}
+                    </button>
+                    <div className="text-center pt-1">
+                      <button type="button" onClick={switchToForgot} className="text-xs text-[var(--ink)]/50 hover:text-[var(--accent)] underline decoration-dotted underline-offset-4">
+                        Forgot password?
+                      </button>
+                    </div>
+                  </form>
+
+                  <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: "var(--rule)" }}>
+                    <button onClick={switchToSignUp} className="text-xs text-[var(--ink)]/60 hover:text-[var(--ink)]">
+                      First time here? <span className="text-[var(--gold)] underline decoration-[var(--gold)] underline-offset-2">Create new account →</span>
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* ===== Step 2B: Sign up ===== */}
+              {step === "signup" && (
+                <>
+                  <div className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Create account</div>
+                  <h2 className="font-display text-3xl mb-2">Set your password.</h2>
+                  <p className="text-sm text-[var(--ink)]/60 mb-6">
+                    <span className="font-mono text-[var(--ink)]">{email}</span>{" "}
+                    <button onClick={editEmail} className="text-[var(--gold)] hover:underline ml-1 text-xs">change</button>
+                  </p>
+
+                  <p className="text-sm text-[var(--ink)]/70 mb-6 leading-relaxed">
+                    You'll use this password every time you sign in. With an account, your report cards sync across devices and your team can see your training progress. At least 6 characters.
+                  </p>
+
+                  <form onSubmit={submitSignUp} className="space-y-5">
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">Create password</label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={e => { setPassword(e.target.value); setError(""); }}
+                          placeholder="At least 6 characters"
+                          className="input-field w-full px-4 py-3 pr-16 rounded text-sm"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(s => !s)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-[0.15em] text-[var(--ink)]/50 hover:text-[var(--ink)]"
+                        >
+                          {showPassword ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">Confirm password</label>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={e => { setConfirmPassword(e.target.value); setError(""); }}
+                        placeholder="Type it again"
+                        className="input-field w-full px-4 py-3 rounded text-sm"
+                      />
+                    </div>
+                    {error && (
+                      <div className="text-xs text-[var(--accent)] flex items-start gap-2">
+                        <span>•</span><span>{error}</span>
+                      </div>
+                    )}
+                    <button type="submit" disabled={busy} className="btn-primary w-full px-6 py-3 rounded text-sm uppercase tracking-[0.18em]">
+                      {busy ? "Creating account…" : "Create Account & Continue →"}
+                    </button>
+                  </form>
+
+                  <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: "var(--rule)" }}>
+                    <button onClick={switchToSignIn} className="text-xs text-[var(--ink)]/60 hover:text-[var(--ink)]">
+                      Already have an account? <span className="text-[var(--gold)] underline decoration-[var(--gold)] underline-offset-2">Sign in instead →</span>
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* ===== Step 2C: Forgot password ===== */}
+              {step === "forgot" && (
+                <>
+                  <div className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Reset password</div>
+                  <h2 className="font-display text-3xl mb-2">Forgot it?</h2>
+                  <p className="text-sm text-[var(--ink)]/60 mb-6">
+                    <span className="font-mono text-[var(--ink)]">{email}</span>{" "}
+                    <button onClick={editEmail} className="text-[var(--gold)] hover:underline ml-1 text-xs">change</button>
+                  </p>
+
+                  <div className="card-warm p-5 mb-6">
+                    <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-2 font-medium">How this works</div>
+                    <ol className="text-sm text-[var(--ink)]/80 space-y-2 leading-relaxed">
+                      <li><strong>1.</strong> Click the button below — your email app (e.g., Outlook) will open with a pre-filled message to your admin.</li>
+                      <li><strong>2.</strong> Just click <em>Send</em>. Your admin will reset your password and email you a temporary one.</li>
+                      <li><strong>3.</strong> Sign in with the temporary password, then change it under <em>Settings → Change Password</em>.</li>
+                    </ol>
+                  </div>
+
+                  <a
+                    href={`mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent("Pitch Studio: Password Reset Request")}&body=${encodeURIComponent(`Hi Camilla,\n\nI need a password reset for the Pitch Studio app.\n\nMy account email: ${email}\n\nThanks!`)}`}
+                    className="btn-primary block text-center w-full px-6 py-3 rounded text-sm uppercase tracking-[0.18em] no-underline"
+                  >
+                    ✉ Email Admin to Request Reset
+                  </a>
+
+                  <p className="text-[11px] text-[var(--ink)]/50 mt-3 text-center leading-relaxed">
+                    Sends to <span className="font-mono">{ADMIN_EMAIL}</span>
+                  </p>
+
+                  <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: "var(--rule)" }}>
+                    <button onClick={switchToSignIn} className="text-xs text-[var(--ink)]/60 hover:text-[var(--ink)]">
+                      ← Back to sign in
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // BROWSER CHECK MODAL — Verifies user is on Chrome
+    // ======================================================================
+
+    function BrowserCheckModal({ onConfirm, onSignOut, user }) {
+      const browser = detectBrowser();
+      const isChrome = browser === "Chrome";
+
+      return (
+        <div className="min-h-screen paper-bg">
+          {/* Top bar */}
+          <header className="border-b" style={{ borderColor: "var(--rule)" }}>
+            <div className="max-w-3xl mx-auto px-8 py-5 flex items-center justify-between">
+              <Logo />
+              <div className="flex items-center gap-4">
+                <div className="text-xs text-[var(--ink)]/60 font-mono">{user.email}</div>
+                <button onClick={onSignOut} className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/40 hover:text-[var(--accent)]">
+                  Sign out
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Dimmed backdrop with centered modal */}
+          <div className="fixed inset-0 flex items-center justify-center px-6 z-50" style={{ background: "rgba(11, 24, 40, 0.65)", backdropFilter: "blur(4px)" }}>
+            <div className="card max-w-lg w-full p-10 fade-up">
+              {isChrome ? (
+                <>
+                  <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Browser check</div>
+                  <h2 className="font-display text-3xl mb-4 leading-tight">Quick confirmation.</h2>
+                  <p className="text-sm text-[var(--ink)]/75 mb-8 leading-relaxed">
+                    This studio is built for <strong>Google Chrome</strong> only — it relies on Chrome's built-in voice features. We've detected you're using Chrome. Confirm to continue.
+                  </p>
+                  <button onClick={onConfirm} className="btn-primary w-full px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                    Yes, I am using Chrome
+                  </button>
+                  <p className="text-[11px] text-[var(--ink)]/40 mt-4 text-center">
+                    You'll only see this once.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="text-[10px] uppercase tracking-[0.25em] mb-3" style={{ color: "var(--accent)" }}>⚠ Wrong browser detected</div>
+                  <h2 className="font-display text-3xl mb-4 leading-tight">
+                    You're using <span style={{ color: "var(--accent)" }}>{browser}</span>.
+                  </h2>
+                  <p className="text-sm text-[var(--ink)]/85 mb-4 leading-relaxed">
+                    This studio is built for <strong>Google Chrome</strong> only. Voice recognition and the AI prospect's voice <strong>will not work</strong> properly in {browser}.
+                  </p>
+
+                  <div className="card-warm p-5 mb-6">
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--gold)] mb-2 font-medium">How to fix this</div>
+                    <ol className="text-sm text-[var(--ink)]/80 space-y-2 leading-relaxed">
+                      <li><strong>1.</strong> Copy the URL from your address bar (<span className="font-mono text-xs">Ctrl+L</span>, then <span className="font-mono text-xs">Ctrl+C</span>).</li>
+                      <li><strong>2.</strong> Open <strong>Google Chrome</strong>.</li>
+                      <li><strong>3.</strong> Paste the URL into Chrome's address bar and sign in there.</li>
+                    </ol>
+                    <p className="text-[11px] text-[var(--ink)]/60 mt-3 leading-relaxed">
+                      Don't have Chrome installed? Download it free from{" "}
+                      <a href="https://www.google.com/chrome/" target="_blank" rel="noreferrer" className="underline decoration-[var(--gold)] underline-offset-2 hover:text-[var(--gold)]">
+                        google.com/chrome
+                      </a>.
+                    </p>
+                  </div>
+
+                  <button onClick={onConfirm} className="btn-ghost w-full px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                    Continue Anyway (Not Recommended)
+                  </button>
+                  <p className="text-[11px] text-[var(--ink)]/40 mt-3 text-center leading-relaxed">
+                    If you continue, voice features may fail silently. Switch to Chrome for the intended experience.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // ONBOARDING VIEW — First-time setup wizard
+    // ======================================================================
+
+    function OnboardingView({ user, onComplete, onSignOut, voices }) {
+      const [step, setStep] = useState(1); // 1: welcome, 2: key, 3: voice
+      const [apiKey, setApiKey] = useState("");
+      const [testStatus, setTestStatus] = useState(null); // null | 'testing' | 'ok' | { error }
+      const [preferredVoice, setPreferredVoice] = useState("");
+
+      const test = async () => {
+        if (!apiKey.trim()) return;
+        setTestStatus("testing");
+        try {
+          await callGroq({
+            apiKey: apiKey.trim(),
+            model: MODEL_PROSPECT,
+            messages: [{ role: "user", content: "Say the single word: ready" }],
+            temperature: 0,
+          });
+          setTestStatus("ok");
+        } catch (e) {
+          setTestStatus({ error: e.message });
+        }
+      };
+
+      const finish = () => {
+        onComplete({ apiKey: apiKey.trim(), voice: preferredVoice });
+      };
+
+      const StepIndicator = () => (
+        <div className="flex items-center gap-3 mb-12">
+          {[1, 2, 3].map(n => (
+            <React.Fragment key={n}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all ${
+                step === n ? "ink-bg" : step > n ? "bg-[var(--gold)] text-[var(--cream)]" : "border border-[var(--rule)] text-[var(--ink)]/40"
+              }`}>
+                {step > n ? "✓" : n}
+              </div>
+              {n < 3 && <div className="flex-1 h-px max-w-16" style={{ background: step > n ? "var(--gold)" : "var(--rule)" }}></div>}
+            </React.Fragment>
+          ))}
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen paper-bg">
+          {/* Top bar */}
+          <header className="border-b" style={{ borderColor: "var(--rule)" }}>
+            <div className="max-w-3xl mx-auto px-8 py-5 flex items-center justify-between">
+              <Logo />
+              <div className="flex items-center gap-4">
+                <div className="text-xs text-[var(--ink)]/60 font-mono">{user.email}</div>
+                <button onClick={onSignOut} className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/40 hover:text-[var(--accent)]">
+                  Sign out
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <div className="max-w-3xl mx-auto px-8 py-12 fade-up">
+            <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">Welcome, {user.name.split(" ")[0]}</div>
+            <h1 className="font-display text-5xl mb-3 leading-tight">Let's get you set up.</h1>
+            <p className="text-[var(--ink)]/60 max-w-xl mb-12 leading-relaxed">
+              A one-time, three-step setup. Each advisor on your team does this once on their own machine. Takes about three minutes.
+            </p>
+
+            <StepIndicator />
+
+            {/* ===== Step 1: Welcome / What this needs ===== */}
+            {step === 1 && (
+              <div className="card p-10 fade-up">
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Step 1 of 3</div>
+                <h2 className="font-display text-3xl mb-5 leading-tight">A few things to know before we begin.</h2>
+
+                <div className="space-y-6 text-sm text-[var(--ink)]/80 leading-relaxed">
+                  <div className="flex gap-4">
+                    <div className="font-display text-2xl text-[var(--gold)] leading-none">01</div>
+                    <div>
+                      <div className="font-display text-base text-[var(--ink)] mb-1">You'll need your own free Groq account.</div>
+                      <p className="text-[var(--ink)]/70">Groq powers the AI prospect's responses. Each advisor uses their own free account so the team isn't sharing rate limits. No credit card required, ever.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="font-display text-2xl text-[var(--gold)] leading-none">02</div>
+                    <div>
+                      <div className="font-display text-base text-[var(--ink)] mb-1">Your data stays on your machine.</div>
+                      <p className="text-[var(--ink)]/70">Voice processing happens locally in Chrome — audio never leaves this computer. Your API key, your transcripts, and your report cards are stored only in this browser.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="font-display text-2xl text-[var(--gold)] leading-none">03</div>
+                    <div>
+                      <div className="font-display text-base text-[var(--ink)] mb-1">Synthetic prospects only.</div>
+                      <p className="text-[var(--ink)]/70">This is a training tool. Never enter real client information into the persona setup or pitch sessions.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-10 flex justify-end">
+                  <button onClick={() => setStep(2)} className="btn-primary px-8 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                    Got it — Continue →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ===== Step 2: Groq API key ===== */}
+            {step === 2 && (
+              <div className="card p-10 fade-up">
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Step 2 of 3</div>
+                <h2 className="font-display text-3xl mb-3 leading-tight">Connect your free Groq account.</h2>
+                <p className="text-sm text-[var(--ink)]/60 mb-8">Three quick clicks to grab a free API key.</p>
+
+                {/* Walkthrough */}
+                <div className="card-warm p-6 mb-8">
+                  <ol className="space-y-4">
+                    <li className="flex gap-4 items-start">
+                      <div className="font-mono text-xs px-2 py-1 rounded shrink-0" style={{ background: "var(--gold)", color: "var(--cream)" }}>1</div>
+                      <div className="text-sm">
+                        Open{" "}
+                        <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="font-medium underline decoration-[var(--gold)] decoration-2 underline-offset-4 hover:text-[var(--gold)]">
+                          console.groq.com/keys
+                        </a>{" "}
+                        in a new tab and sign in with Google or your email. <span className="text-[var(--ink)]/50">(No credit card needed.)</span>
+                      </div>
+                    </li>
+                    <li className="flex gap-4 items-start">
+                      <div className="font-mono text-xs px-2 py-1 rounded shrink-0" style={{ background: "var(--gold)", color: "var(--cream)" }}>2</div>
+                      <div className="text-sm">
+                        Click <span className="font-medium">"Create API Key"</span>, name it something like <span className="font-mono text-xs px-1 py-0.5 rounded bg-white">Pitch Studio</span>, and click Submit.
+                      </div>
+                    </li>
+                    <li className="flex gap-4 items-start">
+                      <div className="font-mono text-xs px-2 py-1 rounded shrink-0" style={{ background: "var(--gold)", color: "var(--cream)" }}>3</div>
+                      <div className="text-sm">
+                        Copy the key (it starts with <span className="font-mono text-xs">gsk_…</span>) and paste it below. <span className="text-[var(--ink)]/50">You won't be able to see it again on the Groq site, so paste it here right away.</span>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+
+                {/* Key input */}
+                <label className="block text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">Paste your Groq API key</label>
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={e => { setApiKey(e.target.value); setTestStatus(null); }}
+                  placeholder="gsk_..."
+                  className="input-field w-full px-4 py-3 rounded text-sm font-mono mb-3"
+                  autoFocus
+                />
+
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <button
+                    onClick={test}
+                    disabled={!apiKey.trim() || testStatus === "testing"}
+                    className="btn-ghost px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]"
+                  >
+                    {testStatus === "testing" ? "Testing…" : "Test Connection"}
+                  </button>
+                  {testStatus === "ok" && (
+                    <span className="text-xs text-emerald-700 flex items-center gap-1">
+                      <span>✓</span> Connection works — you're all set.
+                    </span>
+                  )}
+                  {testStatus && testStatus.error && (
+                    <span className="text-xs text-[var(--accent)]">✗ {testStatus.error.slice(0, 100)}</span>
+                  )}
+                </div>
+
+                <p className="text-[11px] text-[var(--ink)]/40 mb-8">
+                  Tip: Click <em>Test Connection</em> before continuing — better to catch a typo now than mid-pitch.
+                </p>
+
+                <div className="flex justify-between">
+                  <button onClick={() => setStep(1)} className="btn-ghost px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">← Back</button>
+                  <button
+                    onClick={() => setStep(3)}
+                    disabled={!apiKey.trim() || testStatus !== "ok"}
+                    className="btn-primary px-8 py-3 rounded text-xs uppercase tracking-[0.18em]"
+                  >
+                    Continue →
+                  </button>
+                </div>
+                {apiKey.trim() && testStatus !== "ok" && (
+                  <p className="text-[11px] text-[var(--ink)]/50 text-right mt-2">Test the connection above before continuing.</p>
+                )}
+              </div>
+            )}
+
+            {/* ===== Step 3: Voice selection ===== */}
+            {step === 3 && (
+              <div className="card p-10 fade-up">
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Step 3 of 3</div>
+                <h2 className="font-display text-3xl mb-3 leading-tight">Pick a voice for your prospect.</h2>
+                <p className="text-sm text-[var(--ink)]/60 mb-8">
+                  These are voices built into your computer. On Windows, the "Online" voices (Aria, Jenny, Guy) sound the most natural. You can change this anytime in Settings.
+                </p>
+
+                <label className="block text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">Prospect voice</label>
+                <select
+                  value={preferredVoice}
+                  onChange={e => setPreferredVoice(e.target.value)}
+                  className="input-field w-full px-4 py-3 rounded text-sm mb-3"
+                >
+                  <option value="">— Auto-select best voice —</option>
+                  {voices.filter(v => v.lang.startsWith("en")).map(v => (
+                    <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>
+                  ))}
+                </select>
+
+                <button
+                  onClick={() => speak({
+                    text: "Hi, thanks for taking the time to meet with me today. I'm looking forward to learning about how Corbett Road might be able to help with my retirement planning.",
+                    voice: getBestVoice(preferredVoice),
+                  })}
+                  className="btn-ghost px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em] mb-10"
+                >
+                  ▶ Test This Voice
+                </button>
+
+                <div className="card-warm p-5 mb-8">
+                  <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-2">Tip</div>
+                  <p className="text-sm text-[var(--ink)]/80 leading-relaxed">
+                    The voice you pick is just for *your* sessions on this machine. Each advisor on the team can pick their own. The default auto-selection works fine — feel free to skip this and pick later if nothing stands out.
+                  </p>
+                </div>
+
+                <div className="flex justify-between">
+                  <button onClick={() => setStep(2)} className="btn-ghost px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">← Back</button>
+                  <button onClick={finish} className="btn-gold px-8 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                    Enter Studio →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // SETTINGS VIEW (Groq API key management)
+    // ======================================================================
+
+    function SettingsView({ apiKey, onSaveKey, onNavigate, voices, preferredVoice, onSetVoice }) {
+      const [draft, setDraft] = useState(apiKey || "");
+      const [savedToast, setSavedToast] = useState(false);
+      const [testStatus, setTestStatus] = useState(null); // null | 'testing' | 'ok' | { error }
+
+      // Change password state
+      const [newPassword, setNewPassword] = useState("");
+      const [confirmNewPassword, setConfirmNewPassword] = useState("");
+      const [showNewPassword, setShowNewPassword] = useState(false);
+      const [pwStatus, setPwStatus] = useState(null); // null | 'updating' | 'ok' | { error }
+
+      const save = () => {
+        onSaveKey(draft.trim());
+        setSavedToast(true);
+        setTimeout(() => setSavedToast(false), 2000);
+      };
+
+      const updatePassword = async () => {
+        setPwStatus(null);
+        if (newPassword.length < 6) { setPwStatus({ error: "Password must be at least 6 characters." }); return; }
+        if (newPassword !== confirmNewPassword) { setPwStatus({ error: "Passwords don't match." }); return; }
+        setPwStatus("updating");
+        try {
+          const { error } = await sb.auth.updateUser({ password: newPassword });
+          if (error) {
+            setPwStatus({ error: error.message });
+            return;
+          }
+          setPwStatus("ok");
+          setNewPassword(""); setConfirmNewPassword("");
+          setTimeout(() => setPwStatus(null), 4000);
+        } catch (e) {
+          setPwStatus({ error: e.message || "Couldn't update password." });
+        }
+      };
+
+      const test = async () => {
+        setTestStatus("testing");
+        try {
+          const reply = await callGroq({
+            apiKey: draft.trim(),
+            model: MODEL_PROSPECT,
+            messages: [{ role: "user", content: "Say the single word: ready" }],
+            temperature: 0,
+          });
+          setTestStatus("ok");
+          console.log("Groq replied:", reply);
+        } catch (e) {
+          setTestStatus({ error: e.message });
+        }
+      };
+
+      return (
+        <div className="max-w-3xl mx-auto px-8 py-12 fade-up">
+          <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">Settings</div>
+          <h1 className="font-display text-4xl mb-2">Studio Configuration</h1>
+          <p className="text-sm text-[var(--ink)]/60 mb-10">Connect your free Groq API key and pick a voice for your AI prospect.</p>
+
+          {/* Groq key */}
+          <section className="card p-8 mb-6">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="font-display text-xl">Groq API Key</h2>
+              <span className="text-[10px] uppercase tracking-[0.2em] px-2 py-1 rounded" style={{ background: "var(--parchment)", color: "var(--gold)" }}>Free tier</span>
+            </div>
+            <p className="text-sm text-[var(--ink)]/60 mb-6">
+              Groq powers the prospect's brain and the report-card grader. Their free tier is generous and doesn't train on your data. Get a key at{" "}
+              <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="underline decoration-[var(--gold)] underline-offset-4 hover:text-[var(--gold)]">console.groq.com/keys</a>.
+            </p>
+            <div className="space-y-3">
+              <input
+                type="password"
+                value={draft}
+                onChange={e => { setDraft(e.target.value); setTestStatus(null); }}
+                placeholder="gsk_..."
+                className="input-field w-full px-4 py-3 rounded text-sm font-mono"
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <button onClick={save} className="btn-primary px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]">Save Key</button>
+                <button onClick={test} disabled={!draft.trim() || testStatus === "testing"} className="btn-ghost px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]">
+                  {testStatus === "testing" ? "Testing…" : "Test Connection"}
+                </button>
+                {savedToast && <span className="text-xs text-[var(--gold)]">✓ Saved</span>}
+                {testStatus === "ok" && <span className="text-xs text-emerald-700">✓ Connection works</span>}
+                {testStatus && testStatus.error && <span className="text-xs text-[var(--accent)]">✗ {testStatus.error.slice(0, 80)}</span>}
+              </div>
+            </div>
+          </section>
+
+          {/* Voice */}
+          <section className="card p-8 mb-6">
+            <h2 className="font-display text-xl mb-1">Prospect Voice</h2>
+            <p className="text-sm text-[var(--ink)]/60 mb-6">
+              Browser-native voices. Quality varies by your operating system. On Windows, "Microsoft Aria/Guy/Jenny" are the most natural.
+            </p>
+            <select
+              value={preferredVoice || ""}
+              onChange={e => onSetVoice(e.target.value)}
+              className="input-field w-full px-4 py-3 rounded text-sm"
+            >
+              <option value="">— Auto-select best voice —</option>
+              {voices.map(v => (
+                <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>
+              ))}
+            </select>
+            <button
+              onClick={() => speak({ text: "Hi, thanks for taking the time to meet with me today. I'm looking forward to learning more about how Corbett Road might be able to help.", voice: getBestVoice(preferredVoice) })}
+              className="btn-ghost mt-3 px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]"
+            >
+              ▶ Test Voice
+            </button>
+          </section>
+
+          {/* Change Password */}
+          <section className="card p-8 mb-6">
+            <h2 className="font-display text-xl mb-1">Change Password</h2>
+            <p className="text-sm text-[var(--ink)]/60 mb-6">
+              Update your account password. Use this if you signed in with a temporary password from your admin, or just to change your existing one.
+            </p>
+            <div className="space-y-3 max-w-md">
+              <div>
+                <label className="block text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">New password</label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={e => { setNewPassword(e.target.value); setPwStatus(null); }}
+                    placeholder="At least 6 characters"
+                    className="input-field w-full px-4 py-3 pr-16 rounded text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(s => !s)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-[0.15em] text-[var(--ink)]/50 hover:text-[var(--ink)]"
+                  >
+                    {showNewPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">Confirm new password</label>
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  value={confirmNewPassword}
+                  onChange={e => { setConfirmNewPassword(e.target.value); setPwStatus(null); }}
+                  placeholder="Type it again"
+                  className="input-field w-full px-4 py-3 rounded text-sm"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <button
+                  onClick={updatePassword}
+                  disabled={pwStatus === "updating" || !newPassword || !confirmNewPassword}
+                  className="btn-primary px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]"
+                >
+                  {pwStatus === "updating" ? "Updating…" : "Update Password"}
+                </button>
+                {pwStatus === "ok" && <span className="text-xs text-emerald-700">✓ Password updated</span>}
+                {pwStatus && pwStatus.error && <span className="text-xs text-[var(--accent)]">✗ {pwStatus.error}</span>}
+              </div>
+            </div>
+          </section>
+
+          {/* Privacy note */}
+          <section className="card-warm p-8 mb-6">
+            <h3 className="font-display text-lg mb-2">A note on privacy</h3>
+            <p className="text-sm text-[var(--ink)]/70 leading-relaxed">
+              All voice processing (speech recognition and playback) happens locally in Chrome — audio never leaves your computer. Conversation transcripts are sent to Groq for the AI prospect's responses and report-card grading. Report cards are stored only in your browser's local storage. Never enter real client information.
+            </p>
+          </section>
+
+          <button onClick={() => onNavigate("dashboard")} className="btn-ghost px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]">← Back to Studio</button>
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // DASHBOARD VIEW
+    // ======================================================================
+
+    function DashboardView({ user, mode, setMode, reports, onStartSession, onViewReport, hasApiKey }) {
+      const recent = reports.slice(0, 4);
+      const avgScore = useMemo(() => {
+        if (reports.length === 0) return null;
+        const all = reports.flatMap(r => Object.values(r.card?.scores || {}).map(s => s.score).filter(Boolean));
+        if (all.length === 0) return null;
+        return (all.reduce((a, b) => a + b, 0) / all.length).toFixed(1);
+      }, [reports]);
+
+      return (
+        <div className="max-w-6xl mx-auto px-8 py-12">
+          <div className="fade-up">
+            <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">Welcome back, {user.name.split(" ")[0]}</div>
+            <h1 className="font-display text-5xl mb-4 leading-tight">The studio is ready.</h1>
+            <p className="text-[var(--ink)]/60 max-w-xl text-sm leading-relaxed mb-10">
+              Pick a mode, set up a prospect, and run through the seven-step consultative pitch. After the session, you'll receive a graded report card you can revisit anytime.
+            </p>
+
+            {/* Mode toggle */}
+            <div className="flex items-center gap-4 mb-12 flex-wrap">
+              <span className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/50">Mode</span>
+              <div className="mode-toggle">
+                <button onClick={() => setMode("pitch")} className={mode === "pitch" ? "active" : ""}>Pitch</button>
+                <button onClick={() => setMode("practice")} className={mode === "practice" ? "active" : ""}>Practice</button>
+                <button onClick={() => setMode("curriculum")} className={mode === "curriculum" ? "active" : ""}>Curriculum</button>
+              </div>
+              <span className="text-xs text-[var(--ink)]/50 italic">
+                {mode === "pitch" && "A live, unassisted peer pitch with the AI prospect."}
+                {mode === "practice" && "Same prospect — with a coach offering 'best answer' suggestions in real time."}
+                {mode === "curriculum" && "Drill a single step of the seven-step process at a time."}
+              </span>
+            </div>
+          </div>
+
+          {/* Main action card + stats */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="md:col-span-2 ink-bg p-10 rounded relative overflow-hidden fade-up" style={{ animationDelay: "0.1s" }}>
+              <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 -translate-y-1/3 translate-x-1/3" style={{ background: "var(--gold)" }}></div>
+              <div className="relative z-10">
+                <div className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-soft)] mb-4">
+                  {mode === "pitch" && "Pitch mode"}
+                  {mode === "practice" && "Practice mode"}
+                  {mode === "curriculum" && "Curriculum mode"}
+                </div>
+                <h2 className="font-display text-4xl mb-3 leading-tight">
+                  {mode === "pitch" && "Begin a peer pitch session."}
+                  {mode === "practice" && "Begin a guided practice session."}
+                  {mode === "curriculum" && "Drill a single step of the pitch."}
+                </h2>
+                <p className="text-[var(--parchment)]/70 text-sm mb-8 max-w-md">
+                  {mode === "pitch" && "You'll meet a prospective client and run through your pitch live. No hints, no interruptions — just you, the prospect, and the seven-step framework."}
+                  {mode === "practice" && "Same as a peer pitch, but a senior coach watches over your shoulder. After each prospect turn, you'll see what an expert advisor might say next — use it or ignore it."}
+                  {mode === "curriculum" && "Pick one of the seven steps and run a focused, short session that drops you exactly at that point in the conversation. Best way to drill weak areas."}
+                </p>
+                {!hasApiKey ? (
+                  <div className="card-warm p-4 inline-block">
+                    <p className="text-xs text-[var(--ink)]">⚠ Add your free Groq API key in Settings to begin.</p>
+                  </div>
+                ) : (
+                  <button onClick={onStartSession} className="btn-gold px-8 py-3 rounded text-xs uppercase tracking-[0.2em]">
+                    {mode === "curriculum" ? "Pick A Step →" : "Set Up Prospect →"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="card p-8 fade-up" style={{ animationDelay: "0.2s" }}>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">Your stats</div>
+              <div className="space-y-6 mt-4">
+                <div>
+                  <div className="font-display text-4xl">{reports.length}</div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/50 mt-1">Sessions logged</div>
+                </div>
+                <div className="gold-rule"></div>
+                <div>
+                  <div className="font-display text-4xl">{avgScore || "—"}</div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/50 mt-1">Avg. score across all categories</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent report cards */}
+          <div className="fade-up" style={{ animationDelay: "0.3s" }}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl">Recent report cards</h2>
+              {reports.length > 0 && (
+                <button onClick={() => onViewReport(null)} className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/60 hover:text-[var(--ink)]">View all →</button>
+              )}
+            </div>
+
+            {recent.length === 0 ? (
+              <div className="card p-12 text-center">
+                <div className="font-display text-xl text-[var(--ink)]/50 mb-2">No sessions yet</div>
+                <p className="text-sm text-[var(--ink)]/50">Start your first pitch above to begin building your training history.</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {recent.map(r => <ReportCardSummary key={r.id} report={r} onView={() => onViewReport(r.id)} />)}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function ReportCardSummary({ report, onView, onDelete }) {
+      const scores = Object.values(report.card?.scores || {}).map(s => s.score).filter(Boolean);
+      const avg = scores.length ? (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(1) : "—";
+      const date = new Date(report.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+      const prospectName = report.persona?.name || "Anonymous prospect";
+
+      const handleDelete = async (e) => {
+        e.stopPropagation();
+        const confirmed = window.confirm(`Delete the session with ${prospectName}? This cannot be undone.`);
+        if (!confirmed) return;
+        try {
+          await onDelete(report.id);
+        } catch (err) {
+          alert("Couldn't delete: " + err.message);
+        }
+      };
+
+      return (
+        <div className="card p-6 hover:shadow-md transition-shadow w-full relative group">
+          <button onClick={onView} className="block text-left w-full">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 pr-8">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-1">{date} · {report.mode}</div>
+                <div className="font-display text-lg truncate">{prospectName}</div>
+                <div className="text-xs text-[var(--ink)]/50 mt-1 truncate">{report.persona?.notes || `Age ${report.persona?.age || "?"} · ${report.persona?.primaryGoal || ""}`}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="font-display text-3xl" style={{ color: "var(--gold)" }}>{avg}</div>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50">avg score</div>
+              </div>
+            </div>
+          </button>
+          {onDelete && (
+            <button
+              onClick={handleDelete}
+              className="absolute top-3 right-3 w-7 h-7 rounded flex items-center justify-center text-[var(--ink)]/30 hover:text-[var(--accent)] hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+              title="Delete this session"
+              aria-label="Delete session"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"></path>
+                <path d="M10 11v6M14 11v6"></path>
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"></path>
+              </svg>
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // PERSONA SETUP VIEW
+    // ======================================================================
+
+    const EMPTY_PERSONA = {
+      name: "", age: "", retirement: "", retirementGoals: "",
+      currentStrategies: "", primaryGoal: "", comfortLevel: "",
+      pullTime: "", monthlySavings: "", income: "", assets: "", notes: "",
+      difficulty: "Medium",
+      focusStep: null,
+    };
+
+    function PersonaSetupView({ apiKey, mode, onLaunch, onCancel }) {
+      const [persona, setPersona] = useState(EMPTY_PERSONA);
+      const [generating, setGenerating] = useState(false);
+      const [error, setError] = useState("");
+      // Curriculum mode: pick step first, then prospect
+      const [curriculumStep, setCurriculumStep] = useState(null);
+      const [curriculumPhase, setCurriculumPhase] = useState(mode === "curriculum" ? "pickStep" : "persona");
+
+      const set = (k, v) => setPersona(p => ({ ...p, [k]: v }));
+
+      const generate = async () => {
+        setGenerating(true);
+        setError("");
+        try {
+          const reply = await callGroq({
+            apiKey,
+            model: MODEL_GRADER,
+            messages: [{ role: "user", content: buildPersonaGenPrompt() }],
+            temperature: 1.0,
+            jsonMode: true,
+          });
+          const parsed = JSON.parse(reply);
+          // Preserve current difficulty + focusStep when generating
+          setPersona(p => ({ ...EMPTY_PERSONA, ...parsed, difficulty: p.difficulty, focusStep: p.focusStep }));
+        } catch (e) {
+          setError("Couldn't generate a prospect. " + e.message);
+        } finally {
+          setGenerating(false);
+        }
+      };
+
+      const launch = () => {
+        const finalPersona = mode === "curriculum"
+          ? { ...persona, focusStep: curriculumStep }
+          : persona;
+        onLaunch(finalPersona);
+      };
+
+      const fields = [
+        { key: "name", label: "Name", placeholder: "e.g. Margaret Chen" },
+        { key: "age", label: "Age", placeholder: "e.g. 58" },
+        { key: "retirement", label: "Retirement timeframe", placeholder: "e.g. 7 years" },
+        { key: "retirementGoals", label: "What they want to do in retirement", placeholder: "e.g. Travel, spend time with grandchildren" },
+        { key: "currentStrategies", label: "Current investment strategies", placeholder: "e.g. 401k, individual stocks, savings" },
+        { key: "primaryGoal", label: "Primary financial goal", placeholder: "e.g. Maintain lifestyle, leave inheritance" },
+        { key: "comfortLevel", label: "Investing comfort level", placeholder: "Conservative / Moderate / Aggressive" },
+        { key: "pullTime", label: "Time to pulling money", placeholder: "e.g. 5–10 years" },
+        { key: "monthlySavings", label: "Current monthly savings", placeholder: "e.g. $4,500" },
+        { key: "income", label: "Current household income", placeholder: "e.g. $325,000" },
+        { key: "assets", label: "Current investable assets", placeholder: "e.g. $1.8M" },
+      ];
+
+      const modeLabel = mode === "pitch" ? "Pitch mode" : mode === "practice" ? "Practice mode" : "Curriculum mode";
+
+      // ===== Curriculum: pick step first =====
+      if (mode === "curriculum" && curriculumPhase === "pickStep") {
+        return (
+          <div className="max-w-4xl mx-auto px-8 py-12 fade-up">
+            <button onClick={onCancel} className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/60 hover:text-[var(--ink)] mb-6">← Cancel</button>
+            <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">Curriculum mode · Step 1 of 2</div>
+            <h1 className="font-display text-4xl mb-3">Which step do you want to practice?</h1>
+            <p className="text-sm text-[var(--ink)]/60 max-w-2xl mb-8">
+              Pick a single step of the seven-step pitch process. The session will be short and focused — the prospect will be primed to put you exactly at that point in the conversation, and grading will weight that step heavily.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              {Object.entries(CURRICULUM_STEPS).map(([key, step]) => (
+                <button
+                  key={key}
+                  onClick={() => { setCurriculumStep(key); setCurriculumPhase("persona"); }}
+                  className={`card p-5 text-left transition-all hover:shadow-md ${curriculumStep === key ? "ring-2 ring-[var(--gold)]" : ""}`}
+                >
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--gold)] mb-1">Step {step.order}</div>
+                  <div className="font-display text-lg mb-1">{step.label}</div>
+                  <div className="text-xs text-[var(--ink)]/60 leading-relaxed">{step.focus}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="max-w-4xl mx-auto px-8 py-12 fade-up">
+          <button onClick={onCancel} className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/60 hover:text-[var(--ink)] mb-6">← Cancel</button>
+          <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">
+            {modeLabel} · Step {mode === "curriculum" ? "2" : "1"} of 2
+            {mode === "curriculum" && curriculumStep && (
+              <> · Practicing <span className="text-[var(--gold)]">{CURRICULUM_STEPS[curriculumStep].label}</span></>
+            )}
+          </div>
+          <h1 className="font-display text-4xl mb-3">Set up your prospect.</h1>
+          <p className="text-sm text-[var(--ink)]/60 max-w-2xl mb-8">
+            Fill in as much or as little as you'd like — the AI will invent realistic details for any gaps. Or click "Generate prospect" for a random scenario.
+          </p>
+
+          {/* Difficulty selector — applies to all modes */}
+          <div className="card p-6 mb-6">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-3">Difficulty</div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: "Easy", label: "Easy", desc: "Cooperative & helpful — directs the advisor a bit" },
+                { value: "Medium", label: "Medium", desc: "Realistic — open but appropriately skeptical" },
+                { value: "Hard", label: "Hard", desc: "Skeptical, asks tough fee questions, pushes back" },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => set("difficulty", opt.value)}
+                  className={`p-4 rounded text-left transition-all ${
+                    persona.difficulty === opt.value
+                      ? "ink-bg"
+                      : "border border-[var(--rule)] hover:border-[var(--ink)]"
+                  }`}
+                >
+                  <div className={`font-display text-base mb-1 ${persona.difficulty === opt.value ? "text-[var(--parchment)]" : "text-[var(--ink)]"}`}>
+                    {opt.label}
+                  </div>
+                  <div className={`text-[11px] leading-relaxed ${persona.difficulty === opt.value ? "text-[var(--parchment)]/70" : "text-[var(--ink)]/60"}`}>
+                    {opt.desc}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3 mb-8">
+            <button onClick={generate} disabled={generating} className="btn-primary px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]">
+              {generating ? "Generating…" : "✨ Generate Prospect"}
+            </button>
+            <button onClick={() => setPersona({ ...EMPTY_PERSONA, difficulty: persona.difficulty })} className="btn-ghost px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]">Clear all</button>
+          </div>
+
+          {error && <div className="card-warm p-4 mb-6 text-sm text-[var(--accent)]">{error}</div>}
+
+          <div className="card p-8">
+            <div className="grid md:grid-cols-2 gap-x-8 gap-y-5">
+              {fields.map(f => (
+                <div key={f.key}>
+                  <label className="block text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">{f.label}</label>
+                  <input
+                    type="text"
+                    value={persona[f.key]}
+                    onChange={e => set(f.key, e.target.value)}
+                    placeholder={f.placeholder}
+                    className="input-field w-full px-3 py-2.5 rounded text-sm"
+                  />
+                </div>
+              ))}
+              <div className="md:col-span-2">
+                <label className="block text-[11px] uppercase tracking-[0.18em] text-[var(--ink)]/60 mb-2">Additional context (optional)</label>
+                <textarea
+                  value={persona.notes}
+                  onChange={e => set("notes", e.target.value)}
+                  placeholder="e.g. Recently widowed. Daughter is pushing her to talk to advisors. Skeptical after a bad experience with another firm."
+                  rows={3}
+                  className="input-field w-full px-3 py-2.5 rounded text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex justify-end gap-3">
+            {mode === "curriculum" ? (
+              <button onClick={() => setCurriculumPhase("pickStep")} className="btn-ghost px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">← Pick Different Step</button>
+            ) : (
+              <button onClick={onCancel} className="btn-ghost px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">Back</button>
+            )}
+            <button onClick={launch} className="btn-primary px-8 py-3 rounded text-xs uppercase tracking-[0.18em]">
+              Begin Session →
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // LIVE SESSION VIEW (the heart of the app)
+    // ======================================================================
+
+    function SessionView({ apiKey, mode, persona, voice, onComplete, onCancel }) {
+      const [transcript, setTranscript] = useState([]); // { role: 'advisor'|'prospect', text, ts }
+      const [interimText, setInterimText] = useState("");
+      const [isListening, setIsListening] = useState(false);
+      const [isSpeaking, setIsSpeaking] = useState(false);
+      const [isThinking, setIsThinking] = useState(false);
+      const [coachSuggestion, setCoachSuggestion] = useState("");
+      const [coachLoading, setCoachLoading] = useState(false);
+      const [error, setError] = useState("");
+      const [sessionStartedAt] = useState(Date.now());
+      const [elapsed, setElapsed] = useState(0);
+
+      const recRef = useRef(null);
+      const transcriptRef = useRef(transcript);
+      const transcriptScrollRef = useRef(null);
+      const finalSegmentsRef = useRef([]); // accumulating final segments before sending
+      const silenceTimerRef = useRef(null);
+      const isSpeakingRef = useRef(false);
+      const isListeningRef = useRef(false);
+      const personaRef = useRef(persona);
+      const apiKeyRef = useRef(apiKey);
+      const modeRef = useRef(mode);
+      const voiceRef = useRef(voice);
+
+      useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
+      useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
+      useEffect(() => { personaRef.current = persona; }, [persona]);
+      useEffect(() => { apiKeyRef.current = apiKey; }, [apiKey]);
+      useEffect(() => { modeRef.current = mode; }, [mode]);
+      useEffect(() => { voiceRef.current = voice; }, [voice]);
+
+      // Elapsed time
+      useEffect(() => {
+        const t = setInterval(() => setElapsed(Math.floor((Date.now() - sessionStartedAt) / 1000)), 1000);
+        return () => clearInterval(t);
+      }, [sessionStartedAt]);
+
+      // Auto-scroll transcript
+      useEffect(() => {
+        if (transcriptScrollRef.current) {
+          transcriptScrollRef.current.scrollTop = transcriptScrollRef.current.scrollHeight;
+        }
+      }, [transcript, interimText]);
+
+      // ---------------- Set up speech recognition ----------------
+      useEffect(() => {
+        const rec = getSpeechRecognition();
+        if (!rec) {
+          setError("Your browser doesn't support speech recognition. Please use Chrome or Edge.");
+          return;
+        }
+        recRef.current = rec;
+
+        rec.onresult = (event) => {
+          let interim = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            const txt = result[0].transcript;
+            if (result.isFinal) {
+              finalSegmentsRef.current.push(txt.trim());
+              // Reset silence timer on each final segment
+              clearTimeout(silenceTimerRef.current);
+              silenceTimerRef.current = setTimeout(() => {
+                commitAdvisorTurn();
+              }, 1400); // 1.4s silence = end of turn
+            } else {
+              interim += txt;
+            }
+          }
+          setInterimText(interim);
+        };
+
+        rec.onerror = (e) => {
+          if (e.error === "no-speech" || e.error === "aborted") return;
+          if (e.error === "not-allowed") {
+            setError("Microphone access denied. Allow mic permission in Chrome and reload.");
+          } else {
+            console.warn("STT error", e);
+          }
+        };
+
+        rec.onend = () => {
+          // Auto-restart if we're still in listening mode and bot isn't speaking
+          if (isListeningRef.current && !isSpeakingRef.current && recRef.current) {
+            try { recRef.current.start(); } catch {}
+          }
+        };
+
+        return () => {
+          try { rec.stop(); } catch {}
+          clearTimeout(silenceTimerRef.current);
+        };
+      }, []);
+
+      // Start/stop recognition based on isListening
+      useEffect(() => {
+        if (!recRef.current) return;
+        if (isListening && !isSpeaking) {
+          try { recRef.current.start(); } catch {}
+        } else {
+          try { recRef.current.stop(); } catch {}
+        }
+      }, [isListening, isSpeaking]);
+
+      // ---------------- Conversation loop ----------------
+
+      const commitAdvisorTurn = useCallback(async () => {
+        const segments = finalSegmentsRef.current;
+        if (segments.length === 0) return;
+        const fullText = segments.join(" ").trim();
+        finalSegmentsRef.current = [];
+        setInterimText("");
+        if (!fullText) return;
+
+        const newTurn = { role: "advisor", text: fullText, ts: Date.now() };
+        const updatedTranscript = [...transcriptRef.current, newTurn];
+        setTranscript(updatedTranscript);
+
+        await getProspectReply(updatedTranscript);
+      }, []);
+
+      const getProspectReply = async (currentTranscript, isRetry = false) => {
+        setIsThinking(true);
+        try {
+          const systemPrompt = buildProspectSystemPrompt(personaRef.current);
+          const retryNote = isRetry
+            ? "\n\nIMPORTANT: The advisor has chosen to retry their last response. Generate a meaningfully different reaction this time — maybe more skeptical, maybe pulling on a different thread of the conversation, maybe revealing a different concern. Don't repeat what you said before. Same character, fresh response."
+            : "";
+
+          const messages = [
+            { role: "system", content: systemPrompt + retryNote },
+            ...currentTranscript.map(t => ({
+              role: t.role === "advisor" ? "user" : "assistant",
+              content: t.text,
+            })),
+          ];
+
+          const reply = await callGroq({
+            apiKey: apiKeyRef.current,
+            model: MODEL_PROSPECT,
+            messages,
+            temperature: isRetry ? 1.0 : 0.85,
+          });
+
+          const cleaned = reply.replace(/\*+/g, "").trim();
+          const newTurn = { role: "prospect", text: cleaned, ts: Date.now() };
+          const updated = [...currentTranscript, newTurn];
+          setTranscript(updated);
+          setIsThinking(false);
+
+          // Speak the reply
+          isSpeakingRef.current = true;
+          setIsSpeaking(true);
+          try { recRef.current?.stop(); } catch {}
+
+          // In practice mode, fetch coach suggestion in parallel
+          if (modeRef.current === "practice") {
+            getCoachSuggestion(updated);
+          }
+
+          await speak({
+            text: cleaned,
+            voice: getBestVoice(voiceRef.current),
+            onEnd: () => {
+              isSpeakingRef.current = false;
+              setIsSpeaking(false);
+            },
+          });
+        } catch (e) {
+          setError("Couldn't reach the AI prospect: " + e.message);
+          setIsThinking(false);
+        }
+      };
+
+      // Retry: rewind transcript to BEFORE this prospect turn, regenerate
+      const handleTryAgain = async (prospectTurnIndex) => {
+        if (isThinking || isSpeaking) return;
+        // Stop any ongoing TTS or listening
+        stopSpeaking();
+        isSpeakingRef.current = false;
+        setIsSpeaking(false);
+        try { recRef.current?.stop(); } catch {}
+
+        // Rewind transcript: keep everything up to (but not including) this prospect turn
+        // The advisor's turn right before it stays in the transcript — we just regenerate the prospect's response
+        const rewound = transcriptRef.current.slice(0, prospectTurnIndex);
+        setTranscript(rewound);
+        setCoachSuggestion("");
+        // Re-request the prospect's response with retry flag
+        await getProspectReply(rewound, true);
+      };
+
+      const getCoachSuggestion = async (currentTranscript) => {
+        setCoachLoading(true);
+        try {
+          const lastProspect = [...currentTranscript].reverse().find(t => t.role === "prospect")?.text || "";
+          const recent = currentTranscript.slice(-8).map(t => `${t.role === "advisor" ? "ADVISOR" : "PROSPECT"}: ${t.text}`).join("\n");
+          const reply = await callGroq({
+            apiKey: apiKeyRef.current,
+            model: MODEL_COACH,
+            messages: [
+              { role: "system", content: buildCoachSystemPrompt() },
+              { role: "user", content: `RECENT EXCHANGE:\n${recent}\n\nThe prospect just said: "${lastProspect}"\n\nWhat should the advisor say next? Give the actual words the advisor should say. 2–3 sentences max.` }
+            ],
+            temperature: 0.6,
+          });
+          setCoachSuggestion(reply.replace(/\*+/g, "").trim());
+        } catch (e) {
+          console.warn("Coach error", e);
+        } finally {
+          setCoachLoading(false);
+        }
+      };
+
+      // Toggle mic
+      const toggleMic = () => {
+        if (isSpeaking) { stopSpeaking(); isSpeakingRef.current = false; setIsSpeaking(false); }
+        setIsListening(l => !l);
+      };
+
+      const handleEnd = async () => {
+        // Flush any pending segments
+        clearTimeout(silenceTimerRef.current);
+        if (finalSegmentsRef.current.length > 0) {
+          await commitAdvisorTurn();
+        }
+        stopSpeaking();
+        try { recRef.current?.stop(); } catch {}
+        setIsListening(false);
+        onComplete(transcriptRef.current);
+      };
+
+      const formatTime = (s) => {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${m}:${sec.toString().padStart(2, "0")}`;
+      };
+
+      // Status text
+      let statusText = "Tap the mic to start speaking";
+      let statusColor = "var(--ink)";
+      if (isListening) { statusText = isSpeaking ? "Prospect is speaking…" : "Listening… speak now"; statusColor = "var(--accent)"; }
+      if (isThinking) { statusText = "Prospect is thinking…"; statusColor = "var(--gold)"; }
+      if (isSpeaking) { statusText = "Prospect is speaking…"; statusColor = "var(--gold)"; }
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Top bar */}
+          <div className="border-b ink-bg px-8 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <Logo className="text-[var(--parchment)]" />
+              <div className="h-8 w-px bg-[var(--parchment)]/20"></div>
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold-soft)]">
+                  {mode === "pitch" && "Live pitch"}
+                  {mode === "practice" && "Guided practice"}
+                  {mode === "curriculum" && "Curriculum drill"}
+                </div>
+                <div className="text-sm text-[var(--parchment)]">
+                  with {persona.name || "your prospect"}
+                  {persona.difficulty && (
+                    <span className="ml-2 text-[10px] uppercase tracking-[0.2em] text-[var(--gold-soft)]">· {persona.difficulty}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-sm font-mono text-[var(--parchment)]/70">{formatTime(elapsed)}</div>
+              <button onClick={onCancel} className="text-xs uppercase tracking-[0.18em] text-[var(--parchment)]/60 hover:text-[var(--accent)]">Discard</button>
+              <button onClick={handleEnd} className="btn-gold px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]">
+                End & Get Report Card
+              </button>
+            </div>
+          </div>
+
+          {/* Curriculum scenario brief */}
+          {mode === "curriculum" && persona.focusStep && CURRICULUM_STEPS[persona.focusStep] && (
+            <div className="card-warm px-8 py-4 border-b" style={{ borderColor: "var(--rule)", borderRadius: 0 }}>
+              <div className="max-w-6xl mx-auto">
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-1">
+                  Step {CURRICULUM_STEPS[persona.focusStep].order}: {CURRICULUM_STEPS[persona.focusStep].label}
+                </div>
+                <div className="text-sm text-[var(--ink)]/80 leading-relaxed">
+                  <strong>Scenario:</strong> {CURRICULUM_STEPS[persona.focusStep].scenario}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-[var(--accent)] text-white px-8 py-3 text-sm">{error}</div>
+          )}
+
+          <div className="flex-1 max-w-6xl w-full mx-auto px-8 py-8 grid lg:grid-cols-3 gap-8">
+            {/* Transcript */}
+            <div className={mode === "practice" ? "lg:col-span-2" : "lg:col-span-3"}>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-3">Live transcript</div>
+              <div ref={transcriptScrollRef} className="card p-6 h-[480px] overflow-y-auto">
+                {transcript.length === 0 && !interimText && (
+                  <div className="h-full flex items-center justify-center text-center text-[var(--ink)]/50">
+                    <div>
+                      <div className="font-display text-xl mb-2">Ready when you are.</div>
+                      <p className="text-sm max-w-xs mx-auto">Tap the microphone below and open the meeting. The prospect is waiting for you.</p>
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-5">
+                  {transcript.map((t, i) => {
+                    const isLatestProspect = t.role === "prospect" && i === transcript.length - 1;
+                    const showRetry = mode === "practice" && t.role === "prospect" && isLatestProspect && !isThinking && !isSpeaking;
+                    return (
+                      <div key={i} className={`fade-up ${t.role === "advisor" ? "" : "pl-8"}`}>
+                        <div className="flex items-center justify-between gap-3 mb-1">
+                          <div className={`text-[10px] uppercase tracking-[0.2em] ${t.role === "advisor" ? "text-[var(--ink)]/60" : "text-[var(--gold)]"}`}>
+                            {t.role === "advisor" ? "You" : (persona.name || "Prospect")}
+                          </div>
+                          {showRetry && (
+                            <button
+                              onClick={() => handleTryAgain(i)}
+                              className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/40 hover:text-[var(--gold)] flex items-center gap-1"
+                              title="Re-do your last response — the prospect will react differently"
+                            >
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                <path d="M3 3v5h5"></path>
+                              </svg>
+                              Try Again
+                            </button>
+                          )}
+                        </div>
+                        <div className={`text-sm leading-relaxed ${t.role === "advisor" ? "text-[var(--ink)]" : "text-[var(--ink)]/80 italic"}`}>
+                          {t.text}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {interimText && (
+                    <div className="opacity-50">
+                      <div className="text-[10px] uppercase tracking-[0.2em] mb-1 text-[var(--ink)]/60">You (typing…)</div>
+                      <div className="text-sm leading-relaxed">{interimText}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Mic controls */}
+              <div className="mt-8 flex flex-col items-center">
+                <div className="text-xs uppercase tracking-[0.2em] mb-4" style={{ color: statusColor }}>{statusText}</div>
+                <button
+                  onClick={toggleMic}
+                  disabled={isThinking || isSpeaking}
+                  className={`w-20 h-20 rounded-full flex items-center justify-center relative transition-all ${
+                    isListening ? "bg-[var(--accent)] text-white pulse-ring" : "btn-primary"
+                  }`}
+                  style={{ opacity: (isThinking || isSpeaking) ? 0.5 : 1 }}
+                >
+                  {isSpeaking ? (
+                    <div className="flex items-end gap-1 h-8">
+                      {[0,1,2,3,4].map(i => (
+                        <div key={i} className="wave-bar w-1 h-full bg-current rounded-full" style={{ transformOrigin: "bottom" }}></div>
+                      ))}
+                    </div>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+                      <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3z"/>
+                      <path d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.93V21h-2a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-3.07A7 7 0 0 0 19 11z"/>
+                    </svg>
+                  )}
+                </button>
+                <div className="text-[11px] text-[var(--ink)]/50 mt-3">
+                  {isListening ? "Click to pause · Pause briefly between thoughts" : "Click to start speaking"}
+                </div>
+              </div>
+            </div>
+
+            {/* Coach panel (practice mode only) */}
+            {mode === "practice" && (
+              <div className="lg:col-span-1">
+                <div className="card-warm p-6 sticky top-8">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] font-medium">Coach Suggestion</div>
+                    {coachLoading && <span className="text-[10px] text-[var(--ink)]/40">thinking…</span>}
+                  </div>
+                  <div className="h-px mb-4" style={{ background: "var(--gold)" }}></div>
+                  {coachSuggestion ? (
+                    <div className="text-sm text-[var(--ink)] leading-relaxed italic">"{coachSuggestion}"</div>
+                  ) : (
+                    <div className="text-xs text-[var(--ink)]/50 italic">
+                      After each prospect turn, a senior coach will suggest what an expert advisor might say next. Use it as inspiration — or ignore it and find your own way.
+                    </div>
+                  )}
+                  <div className="mt-6 pt-4 border-t border-[var(--gold)]/20">
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">Practice tip</div>
+                    <p className="text-[11px] text-[var(--ink)]/70 leading-relaxed">
+                      Don't like how the prospect reacted? Click <span className="font-medium">Try Again</span> on their last turn to re-do your previous response — they'll react differently this time.
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-[var(--gold)]/20">
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-3">7-step framework</div>
+                    <ol className="text-[11px] space-y-1.5 text-[var(--ink)]/70">
+                      <li>1. Meeting Introduction</li>
+                      <li>2. Profiling the Prospect</li>
+                      <li>3. Uncovering Problems</li>
+                      <li>4. Reviewing Implications</li>
+                      <li>5. Providing Solutions</li>
+                      <li>6. Call to Action</li>
+                      <li>7. Meeting Wrap-Up</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // REPORT CARD VIEW
+    // ======================================================================
+
+    const RUBRIC_LABELS = {
+      meeting_introduction: "Meeting Introduction",
+      profiling: "Profiling the Prospect",
+      uncovering_problems: "Uncovering Key Problems / Concerns",
+      reviewing_implications: "Reviewing Implications",
+      providing_solutions: "Providing Clear Solutions",
+      call_to_action: "Call to Action & Next Steps",
+      wrap_up: "Meeting Wrap-Up",
+    };
+
+    const QUAL_LABELS = {
+      cadence: "Cadence",
+      conversational_flow: "Conversational Flow",
+      format: "Format",
+      knowledge: "Knowledge Demonstrated",
+      referencing_concerns: "Referencing Client Concerns",
+      rapport: "Building Rapport",
+      confidence: "Confidence",
+      delivery: "Delivery",
+    };
+
+    function ScoreBar({ score }) {
+      const pct = (score / 10) * 100;
+      const color = score >= 8 ? "var(--gold)" : score >= 6 ? "var(--ink)" : "var(--accent)";
+      return (
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-1.5 rounded-full" style={{ background: "var(--rule)" }}>
+            <div className="h-full rounded-full score-bar-fill" style={{ width: `${pct}%`, background: color }}></div>
+          </div>
+          <div className="font-display text-2xl tabular-nums w-8 text-right" style={{ color }}>{score}</div>
+        </div>
+      );
+    }
+
+    // Helper: build a plain-text version of a report for emailing
+    function buildReportEmailBody(report, user) {
+      const card = report.card;
+      const persona = report.persona || {};
+      const va = report.voiceAnalytics;
+      const date = new Date(report.createdAt).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+      const overall = card?.scores ? (() => {
+        const all = Object.values(card.scores).map(s => s.score).filter(Boolean);
+        return all.length ? (all.reduce((a, b) => a + b, 0) / all.length).toFixed(1) : "—";
+      })() : "—";
+
+      const lines = [];
+      lines.push("CORBETT ROAD · PITCH STUDIO REPORT CARD");
+      lines.push("=".repeat(50));
+      lines.push("");
+      lines.push(`Advisor:    ${user?.name || user?.email || "Unknown"}`);
+      lines.push(`Email:      ${user?.email || ""}`);
+      lines.push(`Date:       ${date}`);
+      lines.push(`Mode:       ${report.mode || "pitch"}`);
+      if (persona.difficulty) lines.push(`Difficulty: ${persona.difficulty}`);
+      if (persona.focusStep && CURRICULUM_STEPS[persona.focusStep]) {
+        lines.push(`Focus:      ${CURRICULUM_STEPS[persona.focusStep].label}`);
+      }
+      lines.push(`Prospect:   ${persona.name || "Anonymous"}${persona.age ? `, age ${persona.age}` : ""}`);
+      lines.push("");
+      lines.push(`OVERALL SCORE: ${overall} / 10`);
+      lines.push("");
+
+      if (card?.scores) {
+        lines.push("7-STEP RUBRIC:");
+        Object.entries(RUBRIC_LABELS).forEach(([key, label], i) => {
+          const item = card.scores[key];
+          if (!item) return;
+          lines.push(`  ${i + 1}. ${label}: ${item.score}/10`);
+          if (item.evidence) lines.push(`     Evidence: ${item.evidence}`);
+        });
+        lines.push("");
+      }
+
+      if (card?.summary) {
+        lines.push("SUMMARY:");
+        lines.push(`  ${card.summary}`);
+        lines.push("");
+      }
+
+      if (card?.top_strengths?.length) {
+        lines.push("TOP STRENGTHS:");
+        card.top_strengths.forEach(s => lines.push(`  • ${s}`));
+        lines.push("");
+      }
+
+      if (card?.top_growth_areas?.length) {
+        lines.push("GROWTH AREAS:");
+        card.top_growth_areas.forEach(s => lines.push(`  • ${s}`));
+        lines.push("");
+      }
+
+      if (va) {
+        lines.push("VOICE ANALYTICS:");
+        lines.push(`  Talk ratio:        ${(va.talkRatio * 100).toFixed(0)}% advisor / ${(100 - va.talkRatio * 100).toFixed(0)}% prospect`);
+        lines.push(`  Total words:       ${va.totalAdvisorWords} (advisor) / ${va.totalProspectWords} (prospect)`);
+        lines.push(`  Avg turn length:   ${va.averageTurnWords} words`);
+        lines.push(`  Filler words:      ${va.fillerCount} (${va.fillerPercentage.toFixed(1)}%)`);
+        if (va.topFillers.length) {
+          lines.push(`  Top fillers:       ${va.topFillers.map(([w, c]) => `"${w}" (${c}x)`).join(", ")}`);
+        }
+        lines.push(`  Session duration:  ${va.sessionDurationMin.toFixed(1)} minutes`);
+        lines.push("");
+      }
+
+      lines.push("");
+      lines.push("Generated by Corbett Road Pitch Studio");
+      return lines.join("\n");
+    }
+
+    // ======================================================================
+    // DISCUSSION DIALOG — chat with AI coach about the session
+    // ======================================================================
+
+    function DiscussionDialog({ report, apiKey, onClose }) {
+      const [messages, setMessages] = useState([]); // {role: 'user'|'assistant', content: string}
+      const [input, setInput] = useState("");
+      const [busy, setBusy] = useState(false);
+      const scrollRef = useRef(null);
+      const inputRef = useRef(null);
+
+      const suggestedPrompts = [
+        "What's the single most important thing for me to work on?",
+        "Where did I lose the prospect's interest, and how could I have kept it?",
+        "Show me 3 alternative ways I could have opened this meeting.",
+        "How could I have handled the fee question better?",
+        "What did I do well that I should keep doing?",
+      ];
+
+      useEffect(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      }, [messages, busy]);
+
+      useEffect(() => {
+        if (inputRef.current) inputRef.current.focus();
+      }, []);
+
+      const send = async (text) => {
+        const trimmed = (text || input).trim();
+        if (!trimmed || busy) return;
+        setInput("");
+        const userMsg = { role: "user", content: trimmed };
+        const newMessages = [...messages, userMsg];
+        setMessages(newMessages);
+        setBusy(true);
+        try {
+          const reply = await callGroq({
+            apiKey,
+            model: MODEL_GRADER,
+            messages: [
+              { role: "system", content: buildDiscussionSystemPrompt(report) },
+              ...newMessages,
+            ],
+            temperature: 0.5,
+          });
+          const cleaned = reply.replace(/\*\*/g, "").trim();
+          setMessages([...newMessages, { role: "assistant", content: cleaned }]);
+        } catch (e) {
+          setMessages([...newMessages, { role: "assistant", content: `Sorry — couldn't reach the coach. ${e.message}` }]);
+        } finally {
+          setBusy(false);
+        }
+      };
+
+      const handleKey = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          send();
+        }
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-stretch md:items-center justify-center md:p-6" style={{ background: "rgba(11, 24, 40, 0.7)", backdropFilter: "blur(4px)" }} onClick={onClose}>
+          <div className="card w-full max-w-3xl flex flex-col fade-up" style={{ height: "min(90vh, 760px)" }} onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: "var(--rule)" }}>
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-1">Coach Discussion</div>
+                <h2 className="font-display text-2xl">Talk it through</h2>
+              </div>
+              <button onClick={onClose} className="text-[var(--ink)]/40 hover:text-[var(--ink)] text-2xl leading-none">×</button>
+            </div>
+
+            {/* Messages */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-5">
+              {messages.length === 0 && (
+                <div className="space-y-5">
+                  <p className="text-sm text-[var(--ink)]/70 leading-relaxed">
+                    Ask the coach anything about this session. They have the full transcript, report card, and voice analytics in front of them. Try one of these to start, or type your own question:
+                  </p>
+                  <div className="space-y-2">
+                    {suggestedPrompts.map((p, i) => (
+                      <button
+                        key={i}
+                        onClick={() => send(p)}
+                        className="block w-full text-left p-3 rounded text-sm card-warm hover:bg-[var(--parchment-dim)] transition-colors"
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {messages.map((m, i) => (
+                <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} fade-up`}>
+                  <div className={`max-w-[85%] px-4 py-3 rounded-lg text-sm leading-relaxed ${
+                    m.role === "user" ? "ink-bg rounded-br-none" : "card-warm rounded-bl-none"
+                  }`}>
+                    {m.role === "assistant" && (
+                      <div className="text-[10px] uppercase tracking-[0.2em] mb-1.5 text-[var(--gold)]">Coach</div>
+                    )}
+                    <div className="whitespace-pre-wrap">{m.content}</div>
+                  </div>
+                </div>
+              ))}
+
+              {busy && (
+                <div className="flex justify-start fade-up">
+                  <div className="card-warm rounded-bl-none px-4 py-3 text-sm">
+                    <div className="text-[10px] uppercase tracking-[0.2em] mb-1.5 text-[var(--gold)]">Coach</div>
+                    <div className="flex items-center gap-1.5">
+                      {[0,1,2].map(i => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--ink)]/40" style={{ animation: `pulse 1.4s ease-in-out ${i * 0.2}s infinite` }}></div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Input */}
+            <div className="p-4 border-t" style={{ borderColor: "var(--rule)" }}>
+              <div className="flex gap-3">
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={handleKey}
+                  placeholder="Ask anything about this session..."
+                  rows={1}
+                  className="input-field flex-1 px-4 py-3 rounded text-sm resize-none"
+                  style={{ minHeight: "44px", maxHeight: "120px" }}
+                  disabled={busy}
+                />
+                <button
+                  onClick={() => send()}
+                  disabled={!input.trim() || busy}
+                  className="btn-primary px-5 rounded text-xs uppercase tracking-[0.18em]"
+                >
+                  Send
+                </button>
+              </div>
+              <div className="text-[10px] text-[var(--ink)]/40 mt-2">Press Enter to send · Shift+Enter for new line</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ReportCardView({ report, onBack, user, allReports, apiKey, onDelete }) {
+      const card = report.card;
+      const persona = report.persona;
+      const [discussOpen, setDiscussOpen] = useState(false);
+      if (!card) return null;
+
+      const overall = useMemo(() => {
+        const all = Object.values(card.scores || {}).map(s => s.score).filter(Boolean);
+        if (!all.length) return 0;
+        return all.reduce((a,b) => a+b, 0) / all.length;
+      }, [card]);
+
+      const date = new Date(report.createdAt).toLocaleDateString(undefined, {
+        weekday: "long", month: "long", day: "numeric", year: "numeric"
+      });
+
+      const va = report.voiceAnalytics;
+
+      const sendToManager = () => {
+        const subject = `Pitch Studio Report Card — ${user?.name || "Advisor"} — ${new Date(report.createdAt).toLocaleDateString()}`;
+        const body = buildReportEmailBody(report, user);
+        const url = `mailto:${ADMIN_EMAIL}?cc=${encodeURIComponent(user?.email || "")}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = url;
+      };
+
+      const handleDelete = async () => {
+        const confirmed = window.confirm("Delete this report card permanently? This cannot be undone.");
+        if (!confirmed) return;
+        try {
+          await onDelete(report.id);
+          onBack();
+        } catch (e) {
+          alert("Couldn't delete: " + e.message);
+        }
+      };
+
+      return (
+        <div className="max-w-5xl mx-auto px-8 py-12 fade-up">
+          <button onClick={onBack} className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/60 hover:text-[var(--ink)] mb-6">← Back</button>
+
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+            <div>
+              <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">Report Card · {report.mode}</div>
+              <h1 className="font-display text-5xl mb-2 leading-tight">{persona?.name || "Prospect Pitch"}</h1>
+              <div className="text-sm text-[var(--ink)]/60">{date}</div>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50">Overall</div>
+                <div className="font-display text-6xl leading-none" style={{ color: "var(--gold)" }}>{overall.toFixed(1)}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary */}
+          {card.summary && (
+            <div className="card-warm p-8 mb-12">
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Summary</div>
+              <p className="font-display text-xl leading-relaxed text-[var(--ink)]">{card.summary}</p>
+            </div>
+          )}
+
+          {/* Strengths & Growth */}
+          {(card.top_strengths?.length || card.top_growth_areas?.length) && (
+            <div className="grid md:grid-cols-2 gap-6 mb-12">
+              <div className="card p-6">
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Top Strengths</div>
+                <ul className="space-y-2 text-sm leading-relaxed">
+                  {(card.top_strengths || []).map((s, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span style={{ color: "var(--gold)" }}>✓</span>
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="card p-6">
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] mb-3">Growth Areas</div>
+                <ul className="space-y-2 text-sm leading-relaxed">
+                  {(card.top_growth_areas || []).map((s, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span style={{ color: "var(--accent)" }}>→</span>
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* 7-step rubric */}
+          <div className="mb-12">
+            <h2 className="font-display text-2xl mb-6">The Seven-Step Rubric</h2>
+            <div className="space-y-6">
+              {Object.entries(RUBRIC_LABELS).map(([key, label], i) => {
+                const item = card.scores?.[key];
+                if (!item) return null;
+                return (
+                  <div key={key} className="card p-6">
+                    <div className="flex items-start justify-between mb-3 gap-4">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/40 mb-1">Step {i + 1}</div>
+                        <div className="font-display text-xl">{label}</div>
+                      </div>
+                    </div>
+                    <ScoreBar score={item.score || 0} />
+                    {item.evidence && (
+                      <div className="mt-4 pl-4 border-l-2" style={{ borderColor: "var(--gold)" }}>
+                        <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-1">Evidence</div>
+                        <div className="text-sm text-[var(--ink)]/80 italic">{item.evidence}</div>
+                      </div>
+                    )}
+                    {item.reasoning && (
+                      <div className="mt-3 text-sm text-[var(--ink)]/70 leading-relaxed">{item.reasoning}</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Qualitative */}
+          {card.qualitative && (
+            <div className="mb-12">
+              <h2 className="font-display text-2xl mb-6">Delivery & Style</h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {Object.entries(QUAL_LABELS).map(([key, label]) => {
+                  const text = card.qualitative[key];
+                  if (!text) return null;
+                  return (
+                    <div key={key} className="card p-5">
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">{label}</div>
+                      <div className="text-sm text-[var(--ink)]/80 leading-relaxed">{text}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Voice Analytics */}
+          {va && (
+            <div className="mb-12">
+              <h2 className="font-display text-2xl mb-6">Voice Analytics</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="card p-5">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">Talk vs Listen</div>
+                  <div className="font-display text-3xl mb-1" style={{ color: va.talkRatio > 0.65 ? "var(--accent)" : va.talkRatio < 0.35 ? "var(--gold)" : "var(--ink)" }}>
+                    {(va.talkRatio * 100).toFixed(0)}%
+                  </div>
+                  <div className="text-xs text-[var(--ink)]/60 leading-snug">
+                    You spoke {(va.talkRatio * 100).toFixed(0)}% of the words; prospect spoke {(100 - va.talkRatio * 100).toFixed(0)}%.
+                    {va.talkRatio > 0.65 && " You're talking too much — listen more."}
+                    {va.talkRatio < 0.35 && " Excellent listening ratio."}
+                    {va.talkRatio >= 0.35 && va.talkRatio <= 0.65 && " Balanced conversation."}
+                  </div>
+                </div>
+                <div className="card p-5">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">Filler Words</div>
+                  <div className="font-display text-3xl mb-1" style={{ color: va.fillerPercentage > 5 ? "var(--accent)" : va.fillerPercentage > 2 ? "var(--ink)" : "var(--gold)" }}>
+                    {va.fillerCount}
+                  </div>
+                  <div className="text-xs text-[var(--ink)]/60 leading-snug">
+                    {va.fillerPercentage.toFixed(1)}% of your words.
+                    {va.fillerPercentage > 5 && " Lots of fillers — work on smoother delivery."}
+                    {va.fillerPercentage > 2 && va.fillerPercentage <= 5 && " Normal range, but trimming fillers makes you sound more confident."}
+                    {va.fillerPercentage <= 2 && " Very polished delivery."}
+                  </div>
+                  {va.topFillers.length > 0 && (
+                    <div className="text-[10px] text-[var(--ink)]/50 mt-2">
+                      Top: {va.topFillers.map(([w, c]) => `"${w}" (${c}x)`).join(", ")}
+                    </div>
+                  )}
+                </div>
+                <div className="card p-5">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">Avg Turn Length</div>
+                  <div className="font-display text-3xl mb-1">{va.averageTurnWords}</div>
+                  <div className="text-xs text-[var(--ink)]/60 leading-snug">
+                    Words per advisor turn.
+                    {va.averageTurnWords > 60 && " Long turns — try shorter, more conversational responses."}
+                    {va.averageTurnWords < 15 && " Quite brief — make sure you're elaborating where it counts."}
+                    {va.averageTurnWords >= 15 && va.averageTurnWords <= 60 && " Good conversational rhythm."}
+                  </div>
+                </div>
+                <div className="card p-5">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">Total Words</div>
+                  <div className="font-display text-3xl mb-1">{va.totalAdvisorWords + va.totalProspectWords}</div>
+                  <div className="text-xs text-[var(--ink)]/60 leading-snug">
+                    Across {va.advisorTurnCount + va.prospectTurnCount} turns over {va.sessionDurationMin.toFixed(1)} min.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Progression Chart */}
+          {allReports && allReports.length >= 2 && (
+            <div className="mb-12">
+              <h2 className="font-display text-2xl mb-2">Your Progression</h2>
+              <p className="text-sm text-[var(--ink)]/60 mb-6">Overall score across all your sessions. The highlighted dot is this session.</p>
+              <div className="card p-6">
+                <ProgressionChart reports={allReports} currentReportId={report.id} />
+              </div>
+            </div>
+          )}
+
+          {/* Transcript */}
+          {report.transcript?.length > 0 && (
+            <div className="mb-12">
+              <h2 className="font-display text-2xl mb-6">Full Transcript</h2>
+              <div className="card p-8 max-h-96 overflow-y-auto space-y-4">
+                {report.transcript.map((t, i) => (
+                  <div key={i} className={t.role === "advisor" ? "" : "pl-8"}>
+                    <div className={`text-[10px] uppercase tracking-[0.2em] mb-1 ${t.role === "advisor" ? "text-[var(--ink)]/60" : "text-[var(--gold)]"}`}>
+                      {t.role === "advisor" ? "You" : (persona?.name || "Prospect")}
+                    </div>
+                    <div className={`text-sm leading-relaxed ${t.role === "advisor" ? "text-[var(--ink)]" : "text-[var(--ink)]/80 italic"}`}>{t.text}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between pt-8 border-t flex-wrap gap-3" style={{ borderColor: "var(--rule)" }}>
+            <div className="flex gap-3 flex-wrap">
+              <button onClick={onBack} className="btn-ghost px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">← Back</button>
+              <button onClick={handleDelete} className="px-6 py-3 rounded text-xs uppercase tracking-[0.18em] text-[var(--accent)] hover:bg-red-50 border border-transparent hover:border-[var(--accent)]/30">
+                Delete Session
+              </button>
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              <button onClick={() => setDiscussOpen(true)} className="btn-ghost px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                ✦ Discuss with Coach
+              </button>
+              <button onClick={sendToManager} className="btn-gold px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                ✉ Send to Manager
+              </button>
+              <button onClick={() => window.print()} className="btn-primary px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">Print / Save PDF</button>
+            </div>
+          </div>
+
+          {discussOpen && (
+            <DiscussionDialog report={report} apiKey={apiKey} onClose={() => setDiscussOpen(false)} />
+          )}
+        </div>
+      );
+    }
+
+    // Simple SVG line chart for showing score progression over time
+    function ProgressionChart({ reports, currentReportId }) {
+      const data = useMemo(() => {
+        const sorted = [...reports].sort((a, b) => a.createdAt - b.createdAt);
+        return sorted
+          .map(r => {
+            const scores = Object.values(r.card?.scores || {}).map(s => s.score).filter(s => typeof s === "number" && s > 0);
+            if (scores.length === 0) return null;
+            const overall = scores.reduce((a, b) => a + b, 0) / scores.length;
+            return { id: r.id, score: overall, isCurrent: r.id === currentReportId, date: new Date(r.createdAt) };
+          })
+          .filter(Boolean);
+      }, [reports, currentReportId]);
+
+      if (data.length < 2) {
+        return <div className="text-center text-sm text-[var(--ink)]/50 py-8">Complete more sessions to see your progression.</div>;
+      }
+
+      const width = 700;
+      const height = 220;
+      const padding = { top: 20, right: 20, bottom: 35, left: 40 };
+      const chartW = width - padding.left - padding.right;
+      const chartH = height - padding.top - padding.bottom;
+
+      const xPos = i => padding.left + (data.length === 1 ? chartW / 2 : (i / (data.length - 1)) * chartW);
+      const yPos = score => padding.top + chartH - (score / 10) * chartH;
+
+      const linePoints = data.map((d, i) => `${xPos(i)},${yPos(d.score)}`).join(" ");
+
+      // Compute simple trend (first half avg vs second half avg)
+      const half = Math.floor(data.length / 2);
+      const firstHalfAvg = data.slice(0, half).reduce((s, d) => s + d.score, 0) / half;
+      const secondHalfAvg = data.slice(half).reduce((s, d) => s + d.score, 0) / (data.length - half);
+      const trend = secondHalfAvg - firstHalfAvg;
+
+      return (
+        <div>
+          <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ maxHeight: "300px" }}>
+            {/* Gridlines + y-axis labels */}
+            {[2, 4, 6, 8, 10].map(n => (
+              <g key={n}>
+                <line x1={padding.left} y1={yPos(n)} x2={padding.left + chartW} y2={yPos(n)} stroke="rgba(11,24,40,0.06)" strokeWidth="1" />
+                <text x={padding.left - 8} y={yPos(n) + 4} fontSize="10" fill="rgba(11,24,40,0.4)" textAnchor="end">{n}</text>
+              </g>
+            ))}
+            {/* Line */}
+            <polyline points={linePoints} fill="none" stroke="var(--gold)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+            {/* Points */}
+            {data.map((d, i) => (
+              <g key={d.id}>
+                <circle cx={xPos(i)} cy={yPos(d.score)} r={d.isCurrent ? 7 : 4} fill={d.isCurrent ? "var(--gold)" : "var(--ink)"} stroke="white" strokeWidth="2" />
+                {d.isCurrent && (
+                  <text x={xPos(i)} y={yPos(d.score) - 14} fontSize="11" fill="var(--gold)" textAnchor="middle" fontWeight="600">
+                    {d.score.toFixed(1)}
+                  </text>
+                )}
+              </g>
+            ))}
+            {/* X-axis labels (first and last only) */}
+            <text x={padding.left} y={height - 10} fontSize="10" fill="rgba(11,24,40,0.4)">
+              {data[0].date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+            </text>
+            <text x={padding.left + chartW} y={height - 10} fontSize="10" fill="rgba(11,24,40,0.4)" textAnchor="end">
+              {data[data.length - 1].date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+            </text>
+          </svg>
+          {data.length >= 4 && (
+            <div className="mt-4 text-center text-xs text-[var(--ink)]/60">
+              {trend > 0.5 && <span style={{ color: "var(--gold)" }}>↗ Trending up · +{trend.toFixed(1)} vs your earlier sessions</span>}
+              {trend < -0.5 && <span style={{ color: "var(--accent)" }}>↘ Trending down · {trend.toFixed(1)} vs your earlier sessions</span>}
+              {trend >= -0.5 && trend <= 0.5 && <span>→ Holding steady · keep the reps coming</span>}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // GRADING SCREEN (loading)
+    // ======================================================================
+
+    function GradingView() {
+      return (
+        <div className="min-h-screen flex items-center justify-center paper-bg">
+          <div className="text-center fade-up">
+            <div className="font-display text-3xl mb-4 italic">Reviewing your pitch…</div>
+            <p className="text-sm text-[var(--ink)]/60 mb-8 max-w-sm mx-auto">A senior coach is analyzing the transcript across all seven categories. This usually takes 15–25 seconds.</p>
+            <div className="flex items-center justify-center gap-2">
+              {[0,1,2].map(i => (
+                <div key={i} className="w-2 h-2 rounded-full" style={{ background: "var(--gold)", animation: `pulse 1.4s ease-in-out ${i * 0.2}s infinite` }}></div>
+              ))}
+            </div>
+            <style>{`@keyframes pulse { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }`}</style>
+          </div>
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // HISTORY VIEW
+    // ======================================================================
+
+    function HistoryView({ reports, onView, onDelete }) {
+      // Compute stats
+      const stats = useMemo(() => {
+        const reportsWithScores = reports.filter(r => r.card?.scores);
+        const overallScores = reportsWithScores.map(r => {
+          const scores = Object.values(r.card.scores).map(s => s.score).filter(s => typeof s === "number" && s > 0);
+          return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+        }).filter(s => s !== null);
+
+        const overallAvg = overallScores.length > 0
+          ? overallScores.reduce((a, b) => a + b, 0) / overallScores.length
+          : null;
+
+        // 30-day average
+        const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const recentReports = reportsWithScores.filter(r => r.createdAt >= cutoff);
+        const recentScores = recentReports.map(r => {
+          const scores = Object.values(r.card.scores).map(s => s.score).filter(s => typeof s === "number" && s > 0);
+          return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+        }).filter(s => s !== null);
+
+        const last30Avg = recentScores.length > 0
+          ? recentScores.reduce((a, b) => a + b, 0) / recentScores.length
+          : null;
+
+        // Bar chart data — chronological order
+        const barData = [...reportsWithScores]
+          .sort((a, b) => a.createdAt - b.createdAt)
+          .map(r => {
+            const scores = Object.values(r.card.scores).map(s => s.score).filter(s => typeof s === "number" && s > 0);
+            const score = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+            return { id: r.id, score, date: new Date(r.createdAt) };
+          });
+
+        return { overallAvg, last30Avg, totalSessions: reports.length, scoredSessions: overallScores.length, barData, recentCount: recentReports.length };
+      }, [reports]);
+
+      return (
+        <div className="max-w-5xl mx-auto px-8 py-12 fade-up">
+          <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">Library</div>
+          <h1 className="font-display text-4xl mb-2">All Report Cards</h1>
+          <p className="text-sm text-[var(--ink)]/60 mb-10">Your complete training history. Click any card to revisit feedback and the full transcript.</p>
+
+          {/* Stats header */}
+          {stats.scoredSessions > 0 && (
+            <div className="grid md:grid-cols-3 gap-4 mb-8">
+              <div className="card p-6">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">All-Time Average</div>
+                <div className="font-display text-4xl mb-1" style={{ color: "var(--gold)" }}>
+                  {stats.overallAvg ? stats.overallAvg.toFixed(1) : "—"}
+                </div>
+                <div className="text-xs text-[var(--ink)]/60">Across {stats.scoredSessions} {stats.scoredSessions === 1 ? "session" : "sessions"}</div>
+              </div>
+              <div className="card p-6">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">Last 30 Days Average</div>
+                <div className="font-display text-4xl mb-1" style={{ color: stats.last30Avg ? "var(--ink)" : "var(--ink)" + "33" }}>
+                  {stats.last30Avg ? stats.last30Avg.toFixed(1) : "—"}
+                </div>
+                <div className="text-xs text-[var(--ink)]/60">
+                  {stats.recentCount > 0
+                    ? `${stats.recentCount} ${stats.recentCount === 1 ? "session" : "sessions"} in last 30 days`
+                    : "No sessions in last 30 days"}
+                </div>
+              </div>
+              <div className="card p-6">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--ink)]/50 mb-2">Trend</div>
+                {stats.overallAvg && stats.last30Avg ? (
+                  <>
+                    <div className="font-display text-4xl mb-1" style={{ color: stats.last30Avg > stats.overallAvg ? "var(--gold)" : stats.last30Avg < stats.overallAvg ? "var(--accent)" : "var(--ink)" }}>
+                      {stats.last30Avg > stats.overallAvg ? "↗" : stats.last30Avg < stats.overallAvg ? "↘" : "→"}
+                      {" "}
+                      {(stats.last30Avg - stats.overallAvg >= 0 ? "+" : "")}
+                      {(stats.last30Avg - stats.overallAvg).toFixed(1)}
+                    </div>
+                    <div className="text-xs text-[var(--ink)]/60">
+                      Last 30 days vs. all-time
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="font-display text-4xl mb-1 text-[var(--ink)]/30">—</div>
+                    <div className="text-xs text-[var(--ink)]/60">Need both periods to compare</div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Bar chart */}
+          {stats.barData.length >= 2 && (
+            <div className="card p-6 mb-10">
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-4">Score Progression</div>
+              <ProgressionBarChart data={stats.barData} />
+            </div>
+          )}
+
+          {reports.length === 0 ? (
+            <div className="card p-12 text-center">
+              <div className="font-display text-xl text-[var(--ink)]/50 mb-2">Nothing here yet</div>
+              <p className="text-sm text-[var(--ink)]/50">Complete your first pitch session to start building your library.</p>
+            </div>
+          ) : (
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-3">All Sessions</div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {reports.map(r => (
+                  <ReportCardSummary
+                    key={r.id}
+                    report={r}
+                    onView={() => onView(r.id)}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Bar chart for the All Report Cards page
+    function ProgressionBarChart({ data }) {
+      if (!data || data.length === 0) return null;
+
+      const width = 800;
+      const height = 200;
+      const padding = { top: 20, right: 20, bottom: 40, left: 40 };
+      const chartW = width - padding.left - padding.right;
+      const chartH = height - padding.top - padding.bottom;
+
+      const xPos = i => padding.left + (data.length === 1 ? chartW / 2 : (i / (data.length - 1)) * chartW);
+      const yPos = score => padding.top + chartH - (score / 10) * chartH;
+
+      // Build line path
+      const linePoints = data.map((d, i) => `${xPos(i)},${yPos(d.score)}`).join(" ");
+      // Build subtle area fill under the line for visual weight
+      const areaPath = data.length > 1
+        ? `M ${xPos(0)},${yPos(0)} ${data.map((d, i) => `L ${xPos(i)},${yPos(d.score)}`).join(" ")} L ${xPos(data.length - 1)},${yPos(0)} Z`
+        : "";
+
+      return (
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ maxHeight: "240px" }}>
+          {/* Gridlines + y-axis labels */}
+          {[2, 4, 6, 8, 10].map(n => (
+            <g key={n}>
+              <line x1={padding.left} y1={yPos(n)} x2={padding.left + chartW} y2={yPos(n)} stroke="rgba(11,24,40,0.06)" strokeWidth="1" />
+              <text x={padding.left - 8} y={yPos(n) + 4} fontSize="10" fill="rgba(11,24,40,0.4)" textAnchor="end">{n}</text>
+            </g>
+          ))}
+          {/* Subtle area under line */}
+          {data.length > 1 && (
+            <path d={areaPath} fill="var(--gold)" opacity="0.07" />
+          )}
+          {/* The line itself */}
+          {data.length > 1 && (
+            <polyline
+              points={linePoints}
+              fill="none"
+              stroke="var(--gold)"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          )}
+          {/* Data points */}
+          {data.map((d, i) => {
+            const fill = d.score >= 8 ? "var(--gold)" : d.score >= 6 ? "var(--ink)" : d.score >= 4 ? "var(--gold-soft)" : "var(--accent)";
+            return (
+              <g key={d.id}>
+                <circle
+                  cx={xPos(i)}
+                  cy={yPos(d.score)}
+                  r="5"
+                  fill={fill}
+                  stroke="white"
+                  strokeWidth="2"
+                />
+                {data.length <= 25 && (
+                  <text
+                    x={xPos(i)}
+                    y={yPos(d.score) - 12}
+                    fontSize="10"
+                    fill="rgba(11,24,40,0.6)"
+                    textAnchor="middle"
+                  >
+                    {d.score.toFixed(1)}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+          {/* X-axis labels (first and last) */}
+          <text x={padding.left} y={height - 12} fontSize="10" fill="rgba(11,24,40,0.4)">
+            {data[0].date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+          </text>
+          {data.length > 1 && (
+            <text x={padding.left + chartW} y={height - 12} fontSize="10" fill="rgba(11,24,40,0.4)" textAnchor="end">
+              {data[data.length - 1].date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+            </text>
+          )}
+          {data.length > 1 && (
+            <text x={padding.left + chartW / 2} y={height - 12} fontSize="9" fill="rgba(11,24,40,0.35)" textAnchor="middle">
+              {data.length} sessions · oldest to newest
+            </text>
+          )}
+        </svg>
+      );
+    }
+
+    // ======================================================================
+    // ROOT APP
+    // ======================================================================
+
+    // ======================================================================
+    // MY TEAM VIEW — Cross-team leaderboard, strengths/weaknesses, pairing
+    // ======================================================================
+
+    const RUBRIC_KEYS = [
+      "meeting_introduction",
+      "profiling",
+      "uncovering_problems",
+      "reviewing_implications",
+      "providing_solutions",
+      "call_to_action",
+      "wrap_up",
+    ];
+
+    // Compute per-category averages from a list of report cards
+    function computeCategoryAverages(reports) {
+      const sums = {}; const counts = {};
+      RUBRIC_KEYS.forEach(k => { sums[k] = 0; counts[k] = 0; });
+      for (const r of reports) {
+        const scores = r.card?.scores;
+        if (!scores) continue;
+        for (const k of RUBRIC_KEYS) {
+          const s = scores[k]?.score;
+          if (typeof s === "number" && s > 0) {
+            sums[k] += s;
+            counts[k] += 1;
+          }
+        }
+      }
+      const averages = {};
+      for (const k of RUBRIC_KEYS) {
+        averages[k] = counts[k] > 0 ? sums[k] / counts[k] : null;
+      }
+      return averages;
+    }
+
+    // Identify strengths (top 3) and growth areas (bottom 3) from averages
+    function getStrengthsAndGrowth(averages) {
+      const entries = Object.entries(averages).filter(([_, v]) => v !== null);
+      if (entries.length === 0) return { strengths: [], growth: [] };
+      const sorted = [...entries].sort((a, b) => b[1] - a[1]);
+      return {
+        strengths: sorted.slice(0, 3).map(([k, v]) => ({ key: k, score: v })),
+        growth: sorted.slice(-3).reverse().map(([k, v]) => ({ key: k, score: v })),
+      };
+    }
+
+    // Pairing algorithm — find the advisor whose strengths best complement my growth areas
+    function findBestPairing(myProfile, allTeamData) {
+      const candidates = allTeamData.filter(t => t.userId !== myProfile.userId && t.reportCount > 0);
+      if (candidates.length === 0) return null;
+
+      let best = null;
+      let bestScore = -Infinity;
+
+      for (const candidate of candidates) {
+        // Score: how well does candidate's strengths cover my growth areas + vice versa?
+        let pairScore = 0;
+        for (const myWeakness of myProfile.growth) {
+          const theirScore = candidate.averages[myWeakness.key];
+          if (theirScore !== null) {
+            // The bigger the gap (their score - my score), the better the help
+            pairScore += Math.max(0, theirScore - myWeakness.score) * 1.5;
+          }
+        }
+        for (const theirWeakness of candidate.growth) {
+          const myScore = myProfile.averages[theirWeakness.key];
+          if (myScore !== null) {
+            pairScore += Math.max(0, myScore - theirWeakness.score) * 1.5;
+          }
+        }
+        if (pairScore > bestScore) {
+          bestScore = pairScore;
+          best = candidate;
+        }
+      }
+
+      return best && bestScore > 0 ? best : (candidates[0] || null);
+    }
+
+    function MyTeamView({ currentUser, profiles, allReports, onRefresh }) {
+      const [pairing, setPairing] = useState(null);
+      const [pairingOpen, setPairingOpen] = useState(false);
+
+      // Build per-advisor stats
+      const teamData = useMemo(() => {
+        return profiles.map(p => {
+          const theirReports = allReports.filter(r => r.userId === p.id);
+          const averages = computeCategoryAverages(theirReports);
+          const { strengths, growth } = getStrengthsAndGrowth(averages);
+          const allScores = Object.values(averages).filter(v => v !== null);
+          const overall = allScores.length > 0 ? allScores.reduce((a, b) => a + b, 0) / allScores.length : null;
+          return {
+            userId: p.id,
+            email: p.email,
+            name: p.name || nameFromEmailLocal(p.email),
+            reportCount: theirReports.length,
+            averages,
+            strengths,
+            growth,
+            overall,
+            isMe: p.id === currentUser.id,
+          };
+        });
+      }, [profiles, allReports, currentUser.id]);
+
+      const me = teamData.find(t => t.isMe);
+      const others = teamData.filter(t => !t.isMe);
+
+      const handlePairMe = () => {
+        if (!me || me.reportCount === 0) {
+          alert("Complete at least one pitch session before finding a pairing partner.");
+          return;
+        }
+        const match = findBestPairing(me, teamData);
+        if (!match) {
+          alert("No teammates have completed sessions yet. Encourage someone else to run a pitch!");
+          return;
+        }
+        setPairing({ me, match });
+        setPairingOpen(true);
+      };
+
+      return (
+        <div className="max-w-6xl mx-auto px-8 py-12 fade-up">
+          <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-2">Team</div>
+              <h1 className="font-display text-5xl mb-3 leading-tight">My Team</h1>
+              <p className="text-sm text-[var(--ink)]/60 max-w-xl leading-relaxed">
+                See where each advisor on the team is strong and where they're growing. Pair up with someone whose strengths cover your weaknesses — and vice versa.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={onRefresh} className="btn-ghost px-5 py-2.5 rounded text-xs uppercase tracking-[0.18em]">
+                Refresh
+              </button>
+              <button onClick={handlePairMe} className="btn-gold px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                ✦ Pair Me With An Advisor
+              </button>
+            </div>
+          </div>
+
+          {teamData.length === 0 && (
+            <div className="card p-12 text-center">
+              <div className="font-display text-xl text-[var(--ink)]/50 mb-2">Loading your team…</div>
+              <p className="text-sm text-[var(--ink)]/50">If this stays empty, no advisors have signed up yet.</p>
+            </div>
+          )}
+
+          {/* Your own card highlighted */}
+          {me && (
+            <div className="mb-6">
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">You</div>
+              <AdvisorCard data={me} highlighted />
+            </div>
+          )}
+
+          {/* Rest of team */}
+          {others.length > 0 && (
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--ink)]/50 mb-3">Teammates</div>
+              <div className="space-y-4">
+                {others.map(t => <AdvisorCard key={t.userId} data={t} />)}
+              </div>
+            </div>
+          )}
+
+          {pairingOpen && pairing && (
+            <PairingModal pairing={pairing} onClose={() => setPairingOpen(false)} />
+          )}
+        </div>
+      );
+    }
+
+    function AdvisorCard({ data, highlighted = false }) {
+      const labelFor = (key) => RUBRIC_LABELS[key] || key;
+
+      return (
+        <div className={`card p-6 ${highlighted ? "ring-2" : ""}`} style={highlighted ? { boxShadow: "0 0 0 1px var(--gold)" } : {}}>
+          <div className="flex items-start justify-between gap-6 flex-wrap">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="font-display text-xl">{data.name}</div>
+                {data.reportCount === 0 && <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/40">No sessions yet</span>}
+              </div>
+              <div className="text-xs text-[var(--ink)]/50 font-mono">{data.email}</div>
+            </div>
+            <div className="text-right">
+              <div className="font-display text-3xl" style={{ color: data.overall ? "var(--gold)" : "var(--ink)" }}>
+                {data.overall ? data.overall.toFixed(1) : "—"}
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--ink)]/50">overall · {data.reportCount} sessions</div>
+            </div>
+          </div>
+
+          {data.reportCount > 0 && (
+            <div className="grid md:grid-cols-2 gap-4 mt-5 pt-5 border-t" style={{ borderColor: "var(--rule)" }}>
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--gold)] mb-2">Strengths</div>
+                <ul className="space-y-1.5">
+                  {data.strengths.map((s, i) => (
+                    <li key={i} className="text-sm flex justify-between gap-3">
+                      <span className="text-[var(--ink)]/80">{labelFor(s.key)}</span>
+                      <span className="font-display tabular-nums" style={{ color: "var(--gold)" }}>{s.score.toFixed(1)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent)] mb-2">Growth Areas</div>
+                <ul className="space-y-1.5">
+                  {data.growth.map((s, i) => (
+                    <li key={i} className="text-sm flex justify-between gap-3">
+                      <span className="text-[var(--ink)]/80">{labelFor(s.key)}</span>
+                      <span className="font-display tabular-nums" style={{ color: "var(--accent)" }}>{s.score.toFixed(1)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function PairingModal({ pairing, onClose }) {
+      const { me, match } = pairing;
+      const labelFor = (key) => RUBRIC_LABELS[key] || key;
+
+      // Find the specific complementary skills
+      const helpfulFromMatch = me.growth
+        .map(w => ({ key: w.key, myScore: w.score, theirScore: match.averages[w.key] }))
+        .filter(o => o.theirScore !== null && o.theirScore > o.myScore)
+        .sort((a, b) => (b.theirScore - b.myScore) - (a.theirScore - a.myScore))
+        .slice(0, 3);
+
+      const helpfulFromMe = match.growth
+        .map(w => ({ key: w.key, theirScore: w.score, myScore: me.averages[w.key] }))
+        .filter(o => o.myScore !== null && o.myScore > o.theirScore)
+        .sort((a, b) => (b.myScore - b.theirScore) - (a.myScore - a.theirScore))
+        .slice(0, 3);
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ background: "rgba(11, 24, 40, 0.7)", backdropFilter: "blur(4px)" }} onClick={onClose}>
+          <div className="card max-w-2xl w-full p-10 fade-up max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Suggested pairing</div>
+            <h2 className="font-display text-4xl mb-2 leading-tight">
+              Pair with <span style={{ color: "var(--gold)" }}>{match.name}</span>
+            </h2>
+            <p className="text-sm text-[var(--ink)]/60 mb-8 leading-relaxed">
+              Based on your training data, you and {match.name.split(" ")[0]} would be a strong pairing. Here's why.
+            </p>
+
+            {helpfulFromMatch.length > 0 && (
+              <div className="card-warm p-6 mb-4">
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Where {match.name.split(" ")[0]} can help you</div>
+                <ul className="space-y-3">
+                  {helpfulFromMatch.map((o, i) => (
+                    <li key={i} className="text-sm leading-relaxed">
+                      <div className="font-display text-base mb-0.5">{labelFor(o.key)}</div>
+                      <div className="text-[var(--ink)]/70">
+                        Your average: <span className="font-mono">{o.myScore.toFixed(1)}</span> · Theirs: <span className="font-mono" style={{ color: "var(--gold)" }}>{o.theirScore.toFixed(1)}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {helpfulFromMe.length > 0 && (
+              <div className="card-warm p-6 mb-8" style={{ background: "rgba(184, 137, 58, 0.08)" }}>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Where you can help {match.name.split(" ")[0]}</div>
+                <ul className="space-y-3">
+                  {helpfulFromMe.map((o, i) => (
+                    <li key={i} className="text-sm leading-relaxed">
+                      <div className="font-display text-base mb-0.5">{labelFor(o.key)}</div>
+                      <div className="text-[var(--ink)]/70">
+                        Their average: <span className="font-mono">{o.theirScore.toFixed(1)}</span> · Yours: <span className="font-mono" style={{ color: "var(--gold)" }}>{o.myScore.toFixed(1)}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {helpfulFromMatch.length === 0 && helpfulFromMe.length === 0 && (
+              <div className="card-warm p-6 mb-8">
+                <p className="text-sm text-[var(--ink)]/70 leading-relaxed">
+                  Both of you score similarly across all categories — you'd benefit most from comparing technique on shared strengths rather than skill exchange.
+                </p>
+              </div>
+            )}
+
+            <div className="card-warm p-6 mb-8" style={{ background: "rgba(11, 24, 40, 0.04)" }}>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--ink)]/60 mb-2">Suggested next step</div>
+              <p className="text-sm text-[var(--ink)]/80 leading-relaxed">
+                Schedule a 30-minute session with {match.name.split(" ")[0]}. Each of you takes a turn pitching while the other observes through the lens of the categories above. Trade specific feedback on those moments.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button onClick={onClose} className="btn-primary px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [view, setView] = useState("dashboard");
+      const [user, setUser] = useState(null); // Supabase user, populated by auth listener
+      const [authLoading, setAuthLoading] = useState(true); // true while we check the initial session
+      const [apiKey, setApiKey] = useState(() => storage.get(STORAGE_KEYS.apiKey, ""));
+      const [reports, setReports] = useState(() => storage.get(STORAGE_KEYS.reports, []));
+      const [reportsLoading, setReportsLoading] = useState(false);
+      const [teamProfiles, setTeamProfiles] = useState([]);
+      const [teamReports, setTeamReports] = useState([]);
+      const [mode, setMode] = useState("pitch");
+      const [activePersona, setActivePersona] = useState(null);
+      const [activeReportId, setActiveReportId] = useState(null);
+      const [grading, setGrading] = useState(false);
+      const [voices, setVoices] = useState([]);
+      const [preferredVoice, setPreferredVoice] = useState(() => storage.get(STORAGE_KEYS.preferredVoice, ""));
+      const [chromeConfirmed, setChromeConfirmed] = useState(() => storage.get(STORAGE_KEYS.chromeConfirmed, false));
+
+      // Load voices (browser quirk: voices populate asynchronously)
+      useEffect(() => {
+        const load = () => {
+          const v = window.speechSynthesis.getVoices();
+          if (v.length) setVoices(v);
+        };
+        load();
+        window.speechSynthesis.onvoiceschanged = load;
+      }, []);
+
+      // ====================================================================
+      // Supabase auth: listen for session changes
+      // ====================================================================
+      useEffect(() => {
+        // Get initial session
+        sb.auth.getSession().then(({ data }) => {
+          if (data.session && data.session.user) {
+            setUser(toAppUser(data.session.user));
+          }
+          setAuthLoading(false);
+        });
+
+        // Listen for changes
+        const { data: { subscription } } = sb.auth.onAuthStateChange((event, session) => {
+          if (session && session.user) {
+            setUser(toAppUser(session.user));
+          } else {
+            setUser(null);
+          }
+        });
+
+        return () => { subscription.unsubscribe(); };
+      }, []);
+
+      // ====================================================================
+      // When user signs in: load report cards from cloud + migrate any local data
+      // ====================================================================
+      useEffect(() => {
+        if (!user) return;
+
+        let cancelled = false;
+        (async () => {
+          setReportsLoading(true);
+          try {
+            // Migrate local reports to cloud (one-time)
+            await migrateLocalReportsIfNeeded(user.id);
+
+            // Load all of this user's reports from cloud
+            const cloudReports = await fetchUserReports(user.id);
+            if (!cancelled) {
+              setReports(cloudReports);
+              storage.set(STORAGE_KEYS.reports, cloudReports);
+            }
+          } catch (e) {
+            console.error("Failed to load cloud reports:", e);
+            // Fall back to local cache
+          } finally {
+            if (!cancelled) setReportsLoading(false);
+          }
+        })();
+
+        return () => { cancelled = true; };
+      }, [user?.id]);
+
+      // ====================================================================
+      // Persistence (local cache only — cloud is authoritative for reports)
+      // ====================================================================
+      useEffect(() => { user ? storage.set(STORAGE_KEYS.user, user) : null; }, [user]);
+      useEffect(() => { storage.set(STORAGE_KEYS.apiKey, apiKey); }, [apiKey]);
+      useEffect(() => { storage.set(STORAGE_KEYS.reports, reports); }, [reports]);
+      useEffect(() => { storage.set(STORAGE_KEYS.preferredVoice, preferredVoice); }, [preferredVoice]);
+      useEffect(() => { storage.set(STORAGE_KEYS.chromeConfirmed, chromeConfirmed); }, [chromeConfirmed]);
+
+      const handleSignOut = async () => {
+        await sb.auth.signOut();
+        // Auth listener will set user to null
+      };
+
+      const handleStartSession = () => {
+        if (!apiKey) { setView("settings"); return; }
+        setView("persona-setup");
+      };
+
+      const handleLaunchSession = (persona) => {
+        setActivePersona(persona);
+        setView("session");
+      };
+
+      const handleSessionComplete = async (transcript) => {
+        if (!transcript || transcript.length < 2) {
+          setView("dashboard");
+          return;
+        }
+        setGrading(true);
+        // Compute voice analytics from transcript
+        const voiceAnalytics = computeVoiceAnalytics(transcript);
+        try {
+          const transcriptText = transcript.map(t => `${t.role === "advisor" ? "ADVISOR" : "PROSPECT"}: ${t.text}`).join("\n\n");
+          const reply = await callGroq({
+            apiKey,
+            model: MODEL_GRADER,
+            messages: [
+              { role: "system", content: "You are a meticulous sales coach. Always return valid JSON." },
+              { role: "user", content: buildGraderSystemPrompt(activePersona, transcriptText) },
+            ],
+            temperature: 0.3,
+            jsonMode: true,
+          });
+          const card = JSON.parse(reply);
+          const newReport = {
+            id: "rpt_" + Date.now(),
+            createdAt: Date.now(),
+            mode,
+            persona: activePersona,
+            transcript,
+            card,
+            voiceAnalytics,
+          };
+          // Save to cloud
+          try {
+            await saveReportToCloud(user.id, newReport);
+          } catch (e) {
+            console.error("Cloud save failed (saved locally):", e);
+          }
+          // Update UI
+          const updated = [newReport, ...reports];
+          setReports(updated);
+          setActiveReportId(newReport.id);
+          setView("report-card");
+        } catch (e) {
+          alert("Couldn't generate report card: " + e.message + "\n\nThe transcript will still be saved locally.");
+          const newReport = {
+            id: "rpt_" + Date.now(),
+            createdAt: Date.now(),
+            mode,
+            persona: activePersona,
+            transcript,
+            card: null,
+            voiceAnalytics,
+          };
+          setReports([newReport, ...reports]);
+          setView("dashboard");
+        } finally {
+          setGrading(false);
+        }
+      };
+
+      // ====================================================================
+      // Delete a report (from cloud + local state)
+      // ====================================================================
+      const handleDeleteReport = async (reportId) => {
+        // If it's a local-only report (id starts with rpt_), just remove from state
+        if (typeof reportId === "string" && reportId.startsWith("rpt_")) {
+          setReports(prev => prev.filter(r => r.id !== reportId));
+          return;
+        }
+        try {
+          await deleteReportFromCloud(reportId);
+          setReports(prev => prev.filter(r => r.id !== reportId));
+        } catch (e) {
+          throw new Error("Couldn't delete from cloud: " + e.message);
+        }
+      };
+
+      // ====================================================================
+      // Load team data when entering team view
+      // ====================================================================
+      const loadTeamData = async () => {
+        try {
+          const [profiles, allReports] = await Promise.all([
+            fetchAllProfiles(),
+            fetchAllReports(),
+          ]);
+          setTeamProfiles(profiles);
+          setTeamReports(allReports);
+        } catch (e) {
+          console.error("Failed to load team data:", e);
+        }
+      };
+
+      const navigateToTeam = async () => {
+        setView("team");
+        loadTeamData(); // fire and forget
+      };
+
+      const activeReport = reports.find(r => r.id === activeReportId);
+
+      // ====================================================================
+      // Routing
+      // ====================================================================
+      if (authLoading) {
+        return (
+          <div className="min-h-screen paper-bg flex items-center justify-center">
+            <div className="text-sm text-[var(--ink)]/40 uppercase tracking-[0.2em]">Loading…</div>
+          </div>
+        );
+      }
+
+      if (!user) return <LoginView onSignIn={() => {}} />;
+
+      // Browser check — happens once per browser, right after first login
+      if (!chromeConfirmed) {
+        return (
+          <BrowserCheckModal
+            user={user}
+            onSignOut={handleSignOut}
+            onConfirm={() => setChromeConfirmed(true)}
+          />
+        );
+      }
+
+      // First-time setup — runs once until they have a working key
+      if (!apiKey) {
+        return (
+          <OnboardingView
+            user={user}
+            voices={voices}
+            onSignOut={handleSignOut}
+            onComplete={({ apiKey: newKey, voice }) => {
+              setApiKey(newKey);
+              if (voice) setPreferredVoice(voice);
+              setView("dashboard");
+            }}
+          />
+        );
+      }
+
+      if (grading) return <GradingView />;
+
+      if (view === "session" && activePersona) {
+        return (
+          <SessionView
+            apiKey={apiKey}
+            mode={mode}
+            persona={activePersona}
+            voice={preferredVoice}
+            onComplete={handleSessionComplete}
+            onCancel={() => { stopSpeaking(); setView("dashboard"); setActivePersona(null); }}
+          />
+        );
+      }
+
+      return (
+        <div className="min-h-screen paper-bg">
+          <TopNav user={user} onSignOut={handleSignOut} onNavigate={(v) => v === "team" ? navigateToTeam() : setView(v)} currentView={view} />
+          {view === "dashboard" && (
+            <DashboardView
+              user={user}
+              mode={mode}
+              setMode={setMode}
+              reports={reports}
+              onStartSession={handleStartSession}
+              onViewReport={(id) => { if (id) { setActiveReportId(id); setView("report-card"); } else { setView("history"); } }}
+              hasApiKey={!!apiKey}
+            />
+          )}
+          {view === "history" && (
+            <HistoryView
+              reports={reports}
+              onView={(id) => { setActiveReportId(id); setView("report-card"); }}
+              onDelete={handleDeleteReport}
+            />
+          )}
+          {view === "team" && (
+            <MyTeamView
+              currentUser={user}
+              profiles={teamProfiles}
+              allReports={teamReports}
+              onRefresh={loadTeamData}
+            />
+          )}
+          {view === "settings" && (
+            <SettingsView
+              apiKey={apiKey}
+              onSaveKey={setApiKey}
+              onNavigate={setView}
+              voices={voices}
+              preferredVoice={preferredVoice}
+              onSetVoice={setPreferredVoice}
+            />
+          )}
+          {view === "persona-setup" && (
+            <PersonaSetupView
+              apiKey={apiKey}
+              mode={mode}
+              onLaunch={handleLaunchSession}
+              onCancel={() => setView("dashboard")}
+            />
+          )}
+          {view === "report-card" && activeReport && (
+            <ReportCardView
+              report={activeReport}
+              onBack={() => setView("dashboard")}
+              user={user}
+              allReports={reports}
+              apiKey={apiKey}
+              onDelete={handleDeleteReport}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // Mount
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
