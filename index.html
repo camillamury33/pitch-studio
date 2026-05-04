@@ -401,6 +401,7 @@ Return ONLY valid JSON in this exact shape (no commentary):
       user: "crpt_user",
       reports: "crpt_reports",
       preferredVoice: "crpt_voice",
+      chromeConfirmed: "crpt_chrome_confirmed",
     };
 
     const storage = {
@@ -466,6 +467,22 @@ Return ONLY valid JSON in this exact shape (no commentary):
 
     function stopSpeaking() {
       try { window.speechSynthesis.cancel(); } catch {}
+    }
+
+    // ======================================================================
+    // BROWSER DETECTION
+    // ======================================================================
+
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      // Order matters — Edge & Opera both contain "Chrome" in UA, so check them first
+      if (/Edg\//.test(ua)) return "Edge";
+      if (/OPR\//.test(ua) || /Opera/.test(ua)) return "Opera";
+      if (/Brave/.test(ua) || (navigator.brave && navigator.brave.isBrave)) return "Brave";
+      if (/Firefox\//.test(ua)) return "Firefox";
+      if (/Chrome\//.test(ua)) return "Chrome";
+      if (/Safari\//.test(ua)) return "Safari";
+      return "an unsupported browser";
     }
 
     // ======================================================================
@@ -596,6 +613,85 @@ Return ONLY valid JSON in this exact shape (no commentary):
               <div className="mt-12 pt-6 border-t text-[11px] text-[var(--ink)]/40 leading-relaxed" style={{ borderColor: "var(--rule)" }}>
                 Restricted to <span className="font-mono">@{COMPANY_DOMAIN}</span> addresses. By signing in you agree to use this tool for training purposes only — never enter real client information.
               </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ======================================================================
+    // BROWSER CHECK MODAL — Verifies user is on Chrome
+    // ======================================================================
+
+    function BrowserCheckModal({ onConfirm, onSignOut, user }) {
+      const browser = detectBrowser();
+      const isChrome = browser === "Chrome";
+
+      return (
+        <div className="min-h-screen paper-bg">
+          {/* Top bar */}
+          <header className="border-b" style={{ borderColor: "var(--rule)" }}>
+            <div className="max-w-3xl mx-auto px-8 py-5 flex items-center justify-between">
+              <Logo />
+              <div className="flex items-center gap-4">
+                <div className="text-xs text-[var(--ink)]/60 font-mono">{user.email}</div>
+                <button onClick={onSignOut} className="text-xs uppercase tracking-[0.18em] text-[var(--ink)]/40 hover:text-[var(--accent)]">
+                  Sign out
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Dimmed backdrop with centered modal */}
+          <div className="fixed inset-0 flex items-center justify-center px-6 z-50" style={{ background: "rgba(11, 24, 40, 0.65)", backdropFilter: "blur(4px)" }}>
+            <div className="card max-w-lg w-full p-10 fade-up">
+              {isChrome ? (
+                <>
+                  <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)] mb-3">Browser check</div>
+                  <h2 className="font-display text-3xl mb-4 leading-tight">Quick confirmation.</h2>
+                  <p className="text-sm text-[var(--ink)]/75 mb-8 leading-relaxed">
+                    This studio is built for <strong>Google Chrome</strong> only — it relies on Chrome's built-in voice features. We've detected you're using Chrome. Confirm to continue.
+                  </p>
+                  <button onClick={onConfirm} className="btn-primary w-full px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                    Yes, I am using Chrome
+                  </button>
+                  <p className="text-[11px] text-[var(--ink)]/40 mt-4 text-center">
+                    You'll only see this once.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="text-[10px] uppercase tracking-[0.25em] mb-3" style={{ color: "var(--accent)" }}>⚠ Wrong browser detected</div>
+                  <h2 className="font-display text-3xl mb-4 leading-tight">
+                    You're using <span style={{ color: "var(--accent)" }}>{browser}</span>.
+                  </h2>
+                  <p className="text-sm text-[var(--ink)]/85 mb-4 leading-relaxed">
+                    This studio is built for <strong>Google Chrome</strong> only. Voice recognition and the AI prospect's voice <strong>will not work</strong> properly in {browser}.
+                  </p>
+
+                  <div className="card-warm p-5 mb-6">
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--gold)] mb-2 font-medium">How to fix this</div>
+                    <ol className="text-sm text-[var(--ink)]/80 space-y-2 leading-relaxed">
+                      <li><strong>1.</strong> Copy the URL from your address bar (<span className="font-mono text-xs">Ctrl+L</span>, then <span className="font-mono text-xs">Ctrl+C</span>).</li>
+                      <li><strong>2.</strong> Open <strong>Google Chrome</strong>.</li>
+                      <li><strong>3.</strong> Paste the URL into Chrome's address bar and sign in there.</li>
+                    </ol>
+                    <p className="text-[11px] text-[var(--ink)]/60 mt-3 leading-relaxed">
+                      Don't have Chrome installed? Download it free from{" "}
+                      <a href="https://www.google.com/chrome/" target="_blank" rel="noreferrer" className="underline decoration-[var(--gold)] underline-offset-2 hover:text-[var(--gold)]">
+                        google.com/chrome
+                      </a>.
+                    </p>
+                  </div>
+
+                  <button onClick={onConfirm} className="btn-ghost w-full px-6 py-3 rounded text-xs uppercase tracking-[0.18em]">
+                    Continue Anyway (Not Recommended)
+                  </button>
+                  <p className="text-[11px] text-[var(--ink)]/40 mt-3 text-center leading-relaxed">
+                    If you continue, voice features may fail silently. Switch to Chrome for the intended experience.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1777,6 +1873,7 @@ Return ONLY valid JSON in this exact shape (no commentary):
       const [grading, setGrading] = useState(false);
       const [voices, setVoices] = useState([]);
       const [preferredVoice, setPreferredVoice] = useState(() => storage.get(STORAGE_KEYS.preferredVoice, ""));
+      const [chromeConfirmed, setChromeConfirmed] = useState(() => storage.get(STORAGE_KEYS.chromeConfirmed, false));
 
       // Load voices (browser quirk: voices populate asynchronously)
       useEffect(() => {
@@ -1793,6 +1890,7 @@ Return ONLY valid JSON in this exact shape (no commentary):
       useEffect(() => { storage.set(STORAGE_KEYS.apiKey, apiKey); }, [apiKey]);
       useEffect(() => { storage.set(STORAGE_KEYS.reports, reports); }, [reports]);
       useEffect(() => { storage.set(STORAGE_KEYS.preferredVoice, preferredVoice); }, [preferredVoice]);
+      useEffect(() => { storage.set(STORAGE_KEYS.chromeConfirmed, chromeConfirmed); }, [chromeConfirmed]);
 
       const handleSignIn = (u) => { setUser(u); setView("dashboard"); };
       const handleSignOut = () => { setUser(null); };
@@ -1859,6 +1957,17 @@ Return ONLY valid JSON in this exact shape (no commentary):
 
       // Routing
       if (!user) return <LoginView onSignIn={handleSignIn} />;
+
+      // Browser check — happens once per browser, right after first login
+      if (!chromeConfirmed) {
+        return (
+          <BrowserCheckModal
+            user={user}
+            onSignOut={handleSignOut}
+            onConfirm={() => setChromeConfirmed(true)}
+          />
+        );
+      }
 
       // First-time setup — runs once until they have a working key
       if (!apiKey) {
